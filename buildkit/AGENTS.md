@@ -3,6 +3,7 @@
 # 规则
 - 在进行代码改造、构建或打包任务前，仔细阅读 README.md
 - 以本文件所在目录为工作目录
+- 使用 uv 作为 Python 项目管理工具
 - 在 .venv 虚拟环境中执行 Python
 - 在 .cache 目录下创建子目录（后续使用 {task} 引用）存放临时缓存文件
 - 不要在项目代码中直接 import 任何代码文件，把代码文件复制到正确的位置后，再从该位置导入代码文件
@@ -57,5 +58,5 @@
 - Vite 需要引入 `vite-plugin-qiankun` 并且设置 `base` 属性与 packageName 对应，参考：`build.vite.tsx`
 
   ## 构建 DIP 应用安装包
-  - 执行 `python3 scripts/build_package.py --arch amd64`，构建 AMD64 架构的 DIP 应用安装包
-  - 执行 `python3 scripts/build_package.py --arch arm64`，构建 ARM64 架构的 DIP 应用安装包
+  - 执行 `uv run scripts/build_package.py --arch amd64`，构建 AMD64 架构的 DIP 应用安装包
+  - 执行 `uv run scripts/build_package.py --arch arm64`，构建 ARM64 架构的 DIP 应用安装包

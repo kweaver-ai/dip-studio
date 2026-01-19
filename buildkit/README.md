@@ -5,7 +5,15 @@ buildkit 是 DIP 应用自动打包工具，用户可以通过智能体将本地
 0. 本工具会肆意修改你的不宝贵代码，如果你觉得舍不得，请在使用本工具前备份好你的宝贝代码（至少本地 Commit 一下）。
 1. 本项目默认使用 Codex 作为代码改造工具，你可以将 AGENTS.md 更名为适配你的开发工具的名字（例如：CLAUDE.md）。
 2. 修改 config.yaml。
-2. 把 buildkit 目录放到你的项目根目录下，告诉 AI 工具 “帮我改造项目并完成构建“。
+3. 把 buildkit 目录放到你的项目根目录下，告诉 AI 工具 “帮我改造项目并完成构建“。
+4. 代码不需要反复被改造，在第一次执行完整的改造 + 构建 + 打包之后，可以使用命令只做构建和打包：
+```bash
+cd buildkit
+uv venv
+source .venv/bin/activate
+uv run scripts/build_package.py --arch=amd64
+uv run scripts/build_package.py --arch=arm64
+```
 
 # DIP 应用安装包
 DIP 应用是运行在 DIP 决策智能平台上的 AI 应用，其安装包结构如下：
