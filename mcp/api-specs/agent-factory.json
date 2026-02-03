@@ -1,0 +1,3956 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "Agent-Factory API",
+    "version": "1.0.0",
+    "description": "API to access DIP\n\n如有任何疑问，可到开发者社区提问：https://developers.aishu.cn\n"
+  },
+  "servers": [
+    {
+      "url": "https://{host}:{port}/api/",
+      "description": "host: DIP服务器IP, port: 默认端口443",
+      "variables": {
+        "host": {
+          "default": "host",
+          "description": "DIP服务器IP"
+        },
+        "port": {
+          "default": "443",
+          "description": "https默认端口443"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "$ref": "../../../../common/common_headers.yaml#/common_header_tag"
+    },
+    {
+      "name": "agent"
+    },
+    {
+      "name": "发布相关"
+    },
+    {
+      "name": "已发布"
+    },
+    {
+      "name": "最近访问"
+    },
+    {
+      "name": "产品"
+    },
+    {
+      "name": "个人空间（开发）"
+    },
+    {
+      "name": "模板"
+    },
+    {
+      "name": "权限"
+    },
+    {
+      "name": "工具结果处理策略"
+    },
+    {
+      "name": "其他"
+    },
+    {
+      "name": "自定义错误码汇总"
+    },
+    {
+      "name": "相关文档",
+      "description": "相关文档：\n- [confluence](https://confluence.aishu.cn/pages/viewpage.action?pageId=261242083)\n- [devops](https://devops.aishu.cn/AISHUDevOps/DIP/_workitems/edit/744857)\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "通用说明",
+      "tags": [
+        "公共Header说明"
+      ]
+    },
+    {
+      "name": "DATA AGENT",
+      "tags": [
+        "agent",
+        "发布相关",
+        "已发布",
+        "最近访问",
+        "产品",
+        "个人空间（开发）",
+        "模板",
+        "权限",
+        "工具结果处理策略",
+        "其他"
+      ]
+    },
+    {
+      "name": "错误码",
+      "tags": [
+        "自定义错误码汇总"
+      ]
+    },
+    {
+      "name": "相关文档",
+      "tags": [
+        "相关文档"
+      ]
+    }
+  ],
+  "paths": {
+    "/agent-factory/v3/agent": {
+      "post": {
+        "summary": "创建agent",
+        "deprecated": false,
+        "description": "创建agent",
+        "tags": [
+          "agent",
+          "agent-internal"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/create_req.yaml#/create_req"
+              },
+              "example": {
+                "name": "信息收集与图片生成小助手",
+                "profile": "这是一个信息收集与图片生成小助手",
+                "key": "info-collector",
+                "avatar_type": 1,
+                "avatar": "2",
+                "product_key": "dip",
+                "is_system_agent": 0,
+                "config": {
+                  "input": {
+                    "fields": [
+                      {
+                        "name": "query",
+                        "type": "string"
+                      },
+                      {
+                        "name": "tmp_files",
+                        "type": "file"
+                      }
+                    ],
+                    "is_temp_zone_enabled": 1,
+                    "temp_zone_config": {
+                      "name": "临时上传区",
+                      "tmp_file_use_type": "upload",
+                      "max_file_count": 50,
+                      "single_file_size_limit": 100,
+                      "single_file_size_limit_unit": "MB",
+                      "support_data_type": [
+                        "file"
+                      ],
+                      "allowed_file_categories": [
+                        "document",
+                        "pdf",
+                        "text"
+                      ]
+                    }
+                  },
+                  "system_prompt": "你是一个专业的客服助手，请用友好的语气回答用户的问题。根据提供的知识库内容，准确回答用户咨询。如果不确定，请明确告知用户。",
+                  "dolphin": "/explore/(system_prompt=",
+                  "is_dolphin_mode": 0,
+                  "data_source": {
+                    "doc": [
+                      {
+                        "ds_id": "181",
+                        "fields": [
+                          {
+                            "name": "代码规范",
+                            "path": "测试数据/代码规范",
+                            "source": "gns://92EE2D87255142B78A6F1DFB6BBB836B/AEBB543FEA1A4FD9917594CA013FC671",
+                            "type": "folder"
+                          },
+                          {
+                            "name": "华控数据源",
+                            "path": "测试数据/华控数据源",
+                            "source": "gns://92EE2D87255142B78A6F1DFB6BBB836B/4CB822D4A40340CC924AAC57F60147D3",
+                            "type": "folder"
+                          }
+                        ]
+                      }
+                    ],
+                    "kg": [
+                      {
+                        "kg_id": "129",
+                        "fields": [
+                          "regions",
+                          "comments"
+                        ],
+                        "output_fields": [
+                          "comments"
+                        ],
+                        "field_properties": {
+                          "regions": [
+                            "※vid",
+                            "regions"
+                          ],
+                          "comments": [
+                            "※vid",
+                            "CONTENT",
+                            "VOTES",
+                            "COMMENT_TIME"
+                          ]
+                        }
+                      }
+                    ],
+                    "metric": [
+                      {
+                        "metric_model_id": "129"
+                      }
+                    ],
+                    "kn_entry": [
+                      {
+                        "kn_entry_id": "129"
+                      }
+                    ],
+                    "knowledge_network": [
+                      {
+                        "knowledge_network_id": "102",
+                        "object_types": [
+                          {
+                            "object_type_id": "213"
+                          }
+                        ]
+                      }
+                    ],
+                    "advanced_config": {
+                      "doc": {
+                        "document_threshold": -5.5,
+                        "retrieval_slices_num": 150,
+                        "max_slice_per_cite": 16,
+                        "rerank_topk": 15,
+                        "slice_head_num": 0,
+                        "slice_tail_num": 2,
+                        "documents_num": 8,
+                        "retrieval_max_length": 32000
+                      },
+                      "kg": {
+                        "graph_rag_topk": 25,
+                        "long_text_length": 256,
+                        "reranker_sim_threshold": -5.5,
+                        "text_match_entity_nums": 60,
+                        "vector_match_entity_nums": 60,
+                        "retrieval_max_length": 32000
+                      }
+                    }
+                  },
+                  "skills": {
+                    "tools": [
+                      {
+                        "tool_id": "tool 1",
+                        "tool_box_id": "tool box 1",
+                        "tool_input": null,
+                        "intervention": false
+                      }
+                    ],
+                    "agents": [
+                      {
+                        "agent_key": "agent 1",
+                        "agent_version": "latest",
+                        "agent_input": null,
+                        "intervention": false
+                      }
+                    ],
+                    "mcps": [
+                      {
+                        "mcp_server_id": "mcp server 1"
+                      }
+                    ]
+                  },
+                  "llms": [
+                    {
+                      "is_default": true,
+                      "llm_config": {
+                        "id": "1901307417048780800",
+                        "name": "aaron-model-dv3",
+                        "model_type": "llm",
+                        "temperature": 1,
+                        "top_p": 1,
+                        "top_k": 1,
+                        "frequency_penalty": 0,
+                        "presence_penalty": 0,
+                        "max_tokens": 1000
+                      }
+                    },
+                    {
+                      "is_default": false,
+                      "llm_config": {
+                        "id": "1901307417048780801",
+                        "name": "gpt-4",
+                        "model_type": "llm",
+                        "temperature": 0.5,
+                        "top_p": 0.95,
+                        "max_tokens": 2000,
+                        "top_k": 1,
+                        "frequency_penalty": 0,
+                        "presence_penalty": 0
+                      }
+                    }
+                  ],
+                  "is_data_flow_set_enabled": 1,
+                  "opening_remark_config": {
+                    "type": "fixed",
+                    "fixed_opening_remark": "您好！我是智能客服助手，很高兴为您服务。请问有什么可以帮助您的吗？"
+                  },
+                  "preset_questions": [
+                    {
+                      "question": "如何查询我的订单状态？"
+                    },
+                    {
+                      "question": "如何申请退款？"
+                    },
+                    {
+                      "question": "产品有哪些功能？"
+                    }
+                  ],
+                  "output": {
+                    "variables": {
+                      "answer_var": "answer",
+                      "doc_retrieval_var": "doc_retrieval_res",
+                      "graph_retrieval_var": "graph_retrieval_res"
+                    },
+                    "default_format": "markdown"
+                  },
+                  "built_in_can_edit_fields": {
+                    "name": false,
+                    "avatar": false,
+                    "profile": false,
+                    "input_config": false,
+                    "system_prompt": false,
+                    "knowledge_source": true,
+                    "model": true,
+                    "skills": false,
+                    "opening_remark_config": false,
+                    "preset_questions": false,
+                    "skills.tools.tool_input": false
+                  },
+                  "memory": {
+                    "is_enabled": false
+                  },
+                  "related_question": {
+                    "is_enabled": false
+                  },
+                  "plan_mode": {
+                    "is_enabled": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "agent id"
+                    },
+                    "version": {
+                      "type": "string",
+                      "description": "- agent版本\n  - 未发布data agent的版本为：v0\n"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "summary": "Agent列表（benchmarch）",
+        "description": "- Agent列表（供模型工厂做 Agent 的 Benchmarch 使用）\n- 只提供`内部接口`\n",
+        "tags": [
+          "agent-ignore"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/page"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/agent_list_for_benchmark.yaml#/agent_list_for_benchmark"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/{agent_id}": {
+      "get": {
+        "summary": "获取agent详情",
+        "deprecated": false,
+        "description": "- 获取agent详情\n  - v0版本的agent详情\n  - 如果是已发布的agent，最新版本和v0版本一致\n",
+        "tags": [
+          "agent",
+          "agent-internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/detail.yaml#/detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "summary": "编辑agent",
+        "deprecated": false,
+        "description": "编辑agent",
+        "tags": [
+          "agent",
+          "agent-internal"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/update_req.yaml#/update_req"
+              },
+              "example": {
+                "name": "信息收集与图片生成小助手",
+                "profile": "这是一个信息收集与图片生成小助手",
+                "avatar_type": 1,
+                "avatar": "2",
+                "config": {
+                  "input": {
+                    "fields": [
+                      {
+                        "name": "query",
+                        "type": "string"
+                      },
+                      {
+                        "name": "tmp_files",
+                        "type": "file"
+                      }
+                    ],
+                    "is_temp_zone_enabled": 1,
+                    "temp_zone_config": {
+                      "name": "临时上传区",
+                      "tmp_file_use_type": "upload",
+                      "max_file_count": 50,
+                      "single_file_size_limit": 100,
+                      "single_file_size_limit_unit": "MB",
+                      "support_data_type": [
+                        "file"
+                      ],
+                      "allowed_file_categories": [
+                        "document",
+                        "pdf",
+                        "text"
+                      ]
+                    }
+                  },
+                  "system_prompt": "你是一个专业的客服助手，请用友好的语气回答用户的问题。根据提供的知识库内容，准确回答用户咨询。如果不确定，请明确告知用户。",
+                  "dolphin": "/explore/(system_prompt=",
+                  "is_dolphin_mode": 0,
+                  "data_source": {
+                    "doc": [
+                      {
+                        "ds_id": "181",
+                        "fields": [
+                          {
+                            "name": "代码规范",
+                            "path": "测试数据/代码规范",
+                            "source": "gns://92EE2D87255142B78A6F1DFB6BBB836B/AEBB543FEA1A4FD9917594CA013FC671",
+                            "type": "folder"
+                          },
+                          {
+                            "name": "华控数据源",
+                            "path": "测试数据/华控数据源",
+                            "source": "gns://92EE2D87255142B78A6F1DFB6BBB836B/4CB822D4A40340CC924AAC57F60147D3",
+                            "type": "folder"
+                          }
+                        ]
+                      }
+                    ],
+                    "kg": [
+                      {
+                        "kg_id": "129",
+                        "fields": [
+                          "regions",
+                          "comments"
+                        ],
+                        "output_fields": [
+                          "comments"
+                        ],
+                        "field_properties": {
+                          "regions": [
+                            "※vid",
+                            "regions"
+                          ],
+                          "comments": [
+                            "※vid",
+                            "CONTENT",
+                            "VOTES",
+                            "COMMENT_TIME"
+                          ]
+                        }
+                      }
+                    ],
+                    "metric": [
+                      {
+                        "metric_model_id": "129"
+                      }
+                    ],
+                    "kn_entry": [
+                      {
+                        "kn_entry_id": "129"
+                      }
+                    ],
+                    "knowledge_network": [
+                      {
+                        "knowledge_network_id": "102",
+                        "object_types": [
+                          {
+                            "object_type_id": "213"
+                          }
+                        ]
+                      }
+                    ],
+                    "advanced_config": {
+                      "doc": {
+                        "document_threshold": -5.5,
+                        "retrieval_slices_num": 150,
+                        "max_slice_per_cite": 16,
+                        "rerank_topk": 15,
+                        "slice_head_num": 0,
+                        "slice_tail_num": 2,
+                        "documents_num": 8,
+                        "retrieval_max_length": 32000
+                      },
+                      "kg": {
+                        "graph_rag_topk": 25,
+                        "long_text_length": 256,
+                        "reranker_sim_threshold": -5.5,
+                        "text_match_entity_nums": 60,
+                        "vector_match_entity_nums": 60,
+                        "retrieval_max_length": 32000
+                      }
+                    }
+                  },
+                  "skills": {
+                    "tools": [
+                      {
+                        "tool_id": "1901300419510927360",
+                        "tool_box_id": "1901300419502538752",
+                        "tool_input": null,
+                        "intervention": false
+                      },
+                      {
+                        "tool_id": "tool-123",
+                        "tool_box_id": "box-456",
+                        "tool_input": [
+                          {
+                            "enable": true,
+                            "input_name": "order_id",
+                            "input_type": "string",
+                            "map_type": "var",
+                            "map_value": "query"
+                          }
+                        ],
+                        "intervention": false
+                      }
+                    ],
+                    "agents": [
+                      {
+                        "agent_key": "agent-456",
+                        "agent_version": "latest",
+                        "agent_input": null,
+                        "intervention": false
+                      }
+                    ],
+                    "mcps": [
+                      {
+                        "mcp_server_id": "mcp-server-789"
+                      }
+                    ]
+                  },
+                  "llms": [
+                    {
+                      "is_default": true,
+                      "llm_config": {
+                        "id": "1901307417048780800",
+                        "name": "aaron-model-dv3",
+                        "model_type": "llm",
+                        "temperature": 1,
+                        "top_p": 1,
+                        "top_k": 1,
+                        "frequency_penalty": 0,
+                        "presence_penalty": 0,
+                        "max_tokens": 1000
+                      }
+                    },
+                    {
+                      "is_default": false,
+                      "llm_config": {
+                        "id": "1901307417048780801",
+                        "name": "gpt-4",
+                        "model_type": "llm",
+                        "temperature": 0.5,
+                        "top_p": 0.95,
+                        "max_tokens": 2000,
+                        "top_k": 1,
+                        "frequency_penalty": 0,
+                        "presence_penalty": 0
+                      }
+                    }
+                  ],
+                  "is_data_flow_set_enabled": 1,
+                  "opening_remark_config": {
+                    "type": "fixed",
+                    "fixed_opening_remark": "您好！我是智能客服助手，很高兴为您服务。请问有什么可以帮助您的吗？"
+                  },
+                  "preset_questions": [
+                    {
+                      "question": "如何查询我的订单状态？"
+                    },
+                    {
+                      "question": "如何申请退款？"
+                    },
+                    {
+                      "question": "产品有哪些功能？"
+                    }
+                  ],
+                  "output": {
+                    "variables": {
+                      "answer_var": "answer",
+                      "doc_retrieval_var": "doc_retrieval_res",
+                      "graph_retrieval_var": "graph_retrieval_res"
+                    },
+                    "default_format": "markdown"
+                  },
+                  "built_in_can_edit_fields": {
+                    "name": false,
+                    "avatar": false,
+                    "profile": false,
+                    "input_config": false,
+                    "system_prompt": false,
+                    "knowledge_source": true,
+                    "model": true,
+                    "skills": false,
+                    "opening_remark_config": false
+                  },
+                  "memory": {
+                    "is_enabled": false
+                  },
+                  "related_question": {
+                    "is_enabled": false
+                  },
+                  "plan_mode": {
+                    "is_enabled": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除agent",
+        "deprecated": false,
+        "description": "删除agent",
+        "tags": [
+          "agent",
+          "agent-internal"
+        ],
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "../../components/components.yaml#/components/parameters/agentIDRequiredPath"
+        }
+      ]
+    },
+    "/agent-factory/v3/agent/by-key/{key}": {
+      "get": {
+        "summary": "根据key获取agent详情",
+        "deprecated": false,
+        "description": "获取agent详情",
+        "tags": [
+          "agent-internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/detail.yaml#/detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "../../components/components.yaml#/components/parameters/KEY"
+        }
+      ]
+    },
+    "/agent-factory/v3/agent/{agent_id}/copy": {
+      "post": {
+        "summary": "复制agent",
+        "description": "复制agent",
+        "tags": [
+          "agent"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/agentIDRequiredPath"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "复制成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/copy_res.yaml#/copy_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/{agent_id}/copy2tpl": {
+      "post": {
+        "summary": "复制agent为模板",
+        "description": "复制agent为模板",
+        "tags": [
+          "agent",
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/agentIDRequiredPath"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "复制成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/copy_res.yaml#/copy_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/{agent_id}/copy2tpl-and-publish": {
+      "post": {
+        "summary": "复制agent为模板并发布",
+        "description": "复制agent为模板并发布",
+        "tags": [
+          "agent",
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/agentIDRequiredPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../../agent_tpl/schema/publish_upsert_req.yaml#/publish_upsert_req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "操作成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../../agent_tpl/schema/publish_upsert_res.yaml#/publish_upsert_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent-self-config-fields": {
+      "get": {
+        "summary": "获取SELF_CONFIG字段结构",
+        "description": "- 获取SELF_CONFIG字段结构定义\n- SELF_CONFIG字段对应agent详情接口的config字段（减去了少量字段）\n- 用于前端动态展示SELF_CONFIG字段树（供用户选择字段）\n",
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功获取字段结构",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/self_config_fields.yaml#/self_config_field"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/ai-autogen": {
+      "post": {
+        "operationId": "aiAutogenContent",
+        "tags": [
+          "其他"
+        ],
+        "summary": "AI自动生成内容",
+        "description": "- 根据提供的提示词，AI自动生成内容\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "params",
+                  "from"
+                ],
+                "properties": {
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "agent名称"
+                      },
+                      "profile": {
+                        "type": "string",
+                        "description": "agent简介"
+                      },
+                      "skills": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "description": "agent技能"
+                        },
+                        "description": "agent技能列表"
+                      },
+                      "sources": {
+                        "type": "array",
+                        "description": "agent知识来源列表",
+                        "items": {
+                          "type": "string",
+                          "description": "agent知识来源（最后一层目录）",
+                          "example": "dir1"
+                        }
+                      }
+                    }
+                  },
+                  "from": {
+                    "type": "string",
+                    "description": "- 内容来源类型\n    - system_prompt: 系统提示词\n      - 流式返回\n    - opening_remarks: 固定开场白\n      - 流式返回\n    - preset_question: 预设问题\n      - 非流式，返回预设问题列表\n",
+                    "enum": [
+                      "system_prompt",
+                      "opening_remarks",
+                      "preset_question"
+                    ]
+                  }
+                }
+              },
+              "example": {
+                "params": {
+                  "name": "agent name",
+                  "profile": "agent profile",
+                  "skills": [
+                    "skill1",
+                    "skill2"
+                  ],
+                  "sources": [
+                    "dir1",
+                    "dir2"
+                  ]
+                },
+                "from": "system_prompt"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "description": "流式返回AI生成的内容"
+                },
+                "example": "data: {\"content\": \"AI生成的第一部分内容\"}\n\ndata: {\"content\": \"AI生成的第二部分内容\"}\n\ndata: [DONE]\n"
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "description": "预设问题"
+                  }
+                },
+                "example": [
+                  "question1",
+                  "question2"
+                ]
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/batch-check-index-status": {
+      "post": {
+        "summary": "批量获取数据处理状态",
+        "description": "- 批量获取数据处理状态\n  - 目前只会获取内置的文档类型（内容数据湖）的agent的数据处理状态\n    - 其他的会默认返回已完成（100%）\n",
+        "tags": [
+          "其他"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "agent_uniq_flags"
+                ],
+                "properties": {
+                  "agent_uniq_flags": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "agent_id": {
+                          "type": "string",
+                          "description": "data agent id"
+                        },
+                        "agent_version": {
+                          "type": "string",
+                          "description": "data agent version"
+                        }
+                      }
+                    },
+                    "description": "data agent id列表"
+                  },
+                  "is_show_fail_infos": {
+                    "type": "boolean",
+                    "description": "是否显示失败信息"
+                  }
+                }
+              },
+              "example": {
+                "agent_uniq_flags": [
+                  {
+                    "agent_id": "id1",
+                    "agent_version": "v1"
+                  },
+                  {
+                    "agent_id": "id2",
+                    "agent_version": "v2"
+                  }
+                ],
+                "is_show_fail_infos": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agent_id": {
+                            "type": "string",
+                            "description": "data agent id"
+                          },
+                          "agent_version": {
+                            "type": "string",
+                            "description": "data agent version"
+                          },
+                          "dataset_id": {
+                            "type": "string",
+                            "description": "数据集id"
+                          },
+                          "complete_count": {
+                            "type": "integer",
+                            "description": "完成数量"
+                          },
+                          "progress": {
+                            "type": "integer",
+                            "description": "进度（0-100）",
+                            "example": 78
+                          },
+                          "fail_infos": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "description": "失败对象id"
+                                },
+                                "fail_msg": {
+                                  "type": "string",
+                                  "description": "失败信息"
+                                },
+                                "name": {
+                                  "type": "string",
+                                  "description": "失败对象名称"
+                                },
+                                "path": {
+                                  "type": "string",
+                                  "description": "失败对象路径"
+                                },
+                                "gns": {
+                                  "type": "string",
+                                  "description": "失败对象gns"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/avatar/built-in/{avatar_id}": {
+      "get": {
+        "summary": "获取内置头像",
+        "description": "获取内置头像",
+        "tags": [
+          "其他-ignore"
+        ],
+        "parameters": [
+          {
+            "name": "avatar_id",
+            "in": "path",
+            "required": true,
+            "description": "头像id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "image/svg+xml": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "description": "SVG格式的头像图片"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/avatar/built-in": {
+      "get": {
+        "summary": "获取内置头像列表",
+        "description": "获取内置头像列表",
+        "tags": [
+          "其他"
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "avatar_id": {
+                        "type": "string",
+                        "description": "头像id"
+                      },
+                      "avatar_url": {
+                        "type": "string",
+                        "description": "头像url"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent-inout/export": {
+      "post": {
+        "summary": "导出数据",
+        "description": "- 批量导出指定的data agent数据\n- 支持导出多个agent\n- 返回JSON格式的导出文件\n- 只能导出\"我的个人空间\"中的agent\n- 如果提供的agent_id有不存在的，会返回404错误\n",
+        "tags": [
+          "其他"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "agent_ids"
+                ],
+                "properties": {
+                  "agent_ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "description": "data agent id",
+                      "example": "agent_001"
+                    },
+                    "description": "要导出的agent列表"
+                  }
+                }
+              },
+              "example": {
+                "agent_ids": [
+                  "agent_001",
+                  "agent_002"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "导出成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "description": "导出的JSON文件"
+                }
+              }
+            },
+            "headers": {
+              "Content-Disposition": {
+                "description": "文件下载头信息",
+                "schema": {
+                  "type": "string",
+                  "example": "attachment; filename=agent_export_20231201.json"
+                }
+              },
+              "Content-Type": {
+                "description": "文件类型",
+                "schema": {
+                  "type": "string",
+                  "example": "application/json"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent-inout/import": {
+      "post": {
+        "summary": "导入数据",
+        "description": "- 从导出的JSON文件中导入data agent数据\n- 支持批量导入多个agent\n- agent标识（key）不可与已存在的重复\n  - 如果重复，需要先删除已存在的agent，再导入\n  - 重复时，会返回重复的agent列表（包括agent_id、agent_key和agent_name）\n- 只能导入到\"我的个人空间\"中\n",
+        "tags": [
+          "其他"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file",
+                  "import_type"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "导入的JSON文件"
+                  },
+                  "import_type": {
+                    "type": "string",
+                    "description": "- 导入类型\n- upsert: 如果agent_key存在则更新，否则创建\n- create: 只能创建，如果agent_key存在则失败\n",
+                    "enum": [
+                      "upsert",
+                      "create"
+                    ],
+                    "example": "upsert"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "contentType": "application/json"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "导入结果",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "is_success": {
+                      "type": "boolean",
+                      "description": "是否导入成功"
+                    },
+                    "config_invalid": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agent_key": {
+                            "type": "string",
+                            "description": "agent标识"
+                          },
+                          "agent_name": {
+                            "type": "string",
+                            "description": "agent名称"
+                          }
+                        }
+                      },
+                      "description": "配置无效的agent列表"
+                    },
+                    "no_create_system_agent_pms": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agent_key": {
+                            "type": "string",
+                            "description": "agent标识"
+                          },
+                          "agent_name": {
+                            "type": "string",
+                            "description": "agent名称"
+                          }
+                        }
+                      },
+                      "description": "- 需要\"创建系统agent权限\"的agent列表\n  - 如果导入的agent为系统agent，会判断当前导入者是否有\"创建系统agent权限\"。如果没有，导入失败，将agent_key和agent_name添加到此列表\n- 细节说明：\n  - 对于更新模式（upsert），虽然对于已存在的agent，不会修改\"是否是系统Agent\"的状态，但对于不存在的agent，会根据导入的agent的\"是否是系统Agent\"字段来进行创建。这里会统一进行判断是否有\"创建系统agent权限\"，不再详细区分某个Agent是创建还是更新。\n"
+                    },
+                    "agent_key_conflict": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agent_key": {
+                            "type": "string",
+                            "description": "agent标识"
+                          },
+                          "agent_name": {
+                            "type": "string",
+                            "description": "agent名称"
+                          }
+                        }
+                      },
+                      "description": "- agent标识冲突的agent列表\n  - 当import_type为upsert时，判断agent_key对应agent是否是当前导入者的agent。如果不是，导入失败，将agent_key和agent_name添加到此列表\n  - 当import_type为create时，如果agent_key存在则失败，将agent_key和agent_name添加到此列表\n"
+                    },
+                    "biz_domain_conflict": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "agent_key": {
+                            "type": "string",
+                            "description": "agent标识"
+                          },
+                          "agent_name": {
+                            "type": "string",
+                            "description": "agent名称"
+                          }
+                        }
+                      },
+                      "description": "- 在更新模式下，agent标识因业务域冲突的agent列表\n  - 如果导入的agent_key对应的agent不是当前业务域的，则导入失败，将agent_key和agent_name添加到此列表\n  - 原因：导入的有其他业务域的agent，在当前业务域下没法更新其他业务域的agent\n- 创建模式下没有这个问题，因为是创建新的agent（agent_key会新生成）\n"
+                    }
+                  }
+                },
+                "examples": {
+                  "success": {
+                    "summary": "导入成功",
+                    "description": "所有agent都成功导入",
+                    "value": {
+                      "is_success": true,
+                      "config_invalid": [],
+                      "no_create_system_agent_pms": [],
+                      "agent_key_conflict": []
+                    }
+                  },
+                  "failure": {
+                    "summary": "导入失败",
+                    "description": "部分agent导入失败，包含各种错误信息",
+                    "value": {
+                      "is_success": false,
+                      "config_invalid": [
+                        {
+                          "agent_key": "invalid_agent_001",
+                          "agent_name": "配置错误的智能体"
+                        }
+                      ],
+                      "no_create_system_agent_pms": [
+                        {
+                          "agent_key": "system_agent_001",
+                          "agent_name": "系统智能体示例"
+                        }
+                      ],
+                      "agent_key_conflict": [
+                        {
+                          "agent_key": "duplicate_agent_001",
+                          "agent_name": "重复的智能体"
+                        }
+                      ],
+                      "biz_domain_conflict": [
+                        {
+                          "agent_key": "duplicate_agent_002",
+                          "agent_name": "重复的智能体"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/dolphin-tpl/list": {
+      "post": {
+        "operationId": "listDolphinTpl",
+        "summary": "获取dolphin模板列表",
+        "description": "获取dolphin模板列表",
+        "tags": [
+          "其他"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "config"
+                ],
+                "properties": {
+                  "config": {
+                    "$ref": "../../agent/schema/config_req.yaml#/config",
+                    "title": "agent配置"
+                  },
+                  "built_in_agent_key": {
+                    "type": "string",
+                    "description": "- 内置agent标识\n- 编辑内置agent的场景使用此字段，其他场景不要给此字段传值\n"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pre_dolphin": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "../../agent/schema/dolphin_tpl.yaml#/dolphin_tpl_res"
+                      },
+                      "description": "在用户自定义dolphin之前执行的内置dolphin语句"
+                    },
+                    "post_dolphin": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "../../agent/schema/dolphin_tpl.yaml#/dolphin_tpl_res"
+                      },
+                      "description": "在用户自定义dolphin之后执行的内置dolphin语句"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent/temp-zone/file-ext-map": {
+      "get": {
+        "operationId": "getFileExtMap",
+        "summary": "获取文件扩展名映射",
+        "description": "获取文件扩展名映射",
+        "tags": [
+          "其他"
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "document": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "文档文件扩展名"
+                    },
+                    "spreadsheet": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "表格文件扩展名"
+                    },
+                    "presentation": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "演示文件扩展名"
+                    },
+                    "text": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "文本文件扩展名"
+                    },
+                    "audio": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "音频文件扩展名"
+                    },
+                    "pdf": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "PDF文件扩展名"
+                    },
+                    "other": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "其他文件扩展名"
+                    },
+                    "video": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "视频文件扩展名"
+                    },
+                    "wikidoc": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "wikidoc文件扩展名"
+                    },
+                    "faq": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "faq文件扩展名"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/product": {
+      "get": {
+        "summary": "获取产品列表",
+        "description": "获取产品列表",
+        "tags": [
+          "产品"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/page"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "../schema/product_list_item.yaml#/product_list_item"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "总数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建产品",
+        "deprecated": false,
+        "description": "创建产品",
+        "tags": [
+          "产品"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/product_create_req.yaml#/product_create_req"
+              },
+              "example": {
+                "name": "智能客服产品",
+                "profile": "这是一个智能客服产品"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "description": "产品标识"
+                    },
+                    "id": {
+                      "type": "integer",
+                      "description": "产品 id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/product/{id}": {
+      "get": {
+        "summary": "获取产品详情",
+        "deprecated": false,
+        "description": "获取产品详情",
+        "tags": [
+          "产品"
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/product_detail.yaml#/product_detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "summary": "编辑产品",
+        "deprecated": false,
+        "description": "编辑产品",
+        "tags": [
+          "产品"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/product_update_req.yaml#/product_update_req"
+              },
+              "example": {
+                "name": "智能客服产品更新版",
+                "profile": "这是一个更新后的智能客服产品"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除产品",
+        "deprecated": false,
+        "description": "删除产品",
+        "tags": [
+          "产品"
+        ],
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "../../components/components.yaml#/components/parameters/IDInt"
+        }
+      ]
+    },
+    "/agent-factory/v3/agent/{agent_id}/publish": {
+      "post": {
+        "operationId": "publishAgent",
+        "summary": "发布智能体",
+        "description": "可以通过提交已有的 agent_id 发布智能体，或者提交 agent_config 创建并发布智能体",
+        "tags": [
+          "发布相关",
+          "发布相关-internal"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/upsert_req.yaml#/upsert_req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "发布成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/publish_upsert_res.yaml#/publish_upsert_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent/{agent_id}/unpublish": {
+      "put": {
+        "operationId": "unpublishAgent",
+        "summary": "取消发布智能体",
+        "description": "通过发布 ID 取消已发布的智能体",
+        "tags": [
+          "发布相关"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "取消发布成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/category": {
+      "get": {
+        "operationId": "getCategory",
+        "summary": "获取智能体分类",
+        "description": "获取智能体分类",
+        "tags": [
+          "发布相关"
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "../../components/components.yaml#/components/schemas/CategoryResp"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent/{agent_id}/publish-info": {
+      "get": {
+        "operationId": "getPublishInfo",
+        "summary": "获取已发布智能体的发布信息",
+        "description": "- 获取已发布智能体的发布信息\n  - 如果提供的agent_id不是已发布智能体，会返回404错误\n",
+        "tags": [
+          "发布相关",
+          "发布相关-internal"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/publish_info.yaml#/publish_info"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      },
+      "put": {
+        "operationId": "updatePublishInfo",
+        "summary": "更新发布信息",
+        "description": "更新发布信息",
+        "tags": [
+          "发布相关"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "agent ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/upsert_req.yaml#/upsert_req"
+              },
+              "examples": {
+                "example1": {
+                  "value": {
+                    "category_id": "id1,id2,id3",
+                    "description": "发布描述",
+                    "publish_to_where": [
+                      "custom_space",
+                      "square"
+                    ],
+                    "pms_control": {
+                      "role_ids": [
+                        "role_id1",
+                        "role_id2"
+                      ],
+                      "user_ids": [
+                        "user_id1",
+                        "user_id2"
+                      ],
+                      "user_group_ids": [
+                        "user_group_id1",
+                        "user_group_id2"
+                      ],
+                      "department_ids": [
+                        "department_id1",
+                        "department_id2"
+                      ]
+                    },
+                    "publish_to_be": [
+                      "api_agent",
+                      "web_sdk_agent",
+                      "skill_agent",
+                      "data_flow_agent"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新发布信息成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/publish_upsert_res.yaml#/publish_upsert_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent-tpl/{id}": {
+      "get": {
+        "operationId": "getAgentTpl",
+        "summary": "获取agent模板详情",
+        "deprecated": false,
+        "description": "获取agent模板详情",
+        "tags": [
+          "模板"
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/detail.yaml#/tpl_detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateAgentTpl",
+        "summary": "编辑agent模板",
+        "deprecated": false,
+        "description": "编辑agent模板",
+        "tags": [
+          "模板"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/update_req.yaml#/tpl_update_req"
+              },
+              "example": {
+                "name": "信息收集与图片生成小助手",
+                "profile": "这是一个信息收集与图片生成小助手",
+                "avatar_type": 1,
+                "avatar": "2",
+                "config": {
+                  "input": {
+                    "fields": [
+                      {
+                        "name": "query",
+                        "type": "string"
+                      },
+                      {
+                        "name": "tmp_files",
+                        "type": "file"
+                      }
+                    ],
+                    "is_temp_zone_enabled": 1,
+                    "temp_zone_config": {
+                      "name": "临时上传区",
+                      "tmp_file_use_type": "upload",
+                      "max_file_count": 50,
+                      "single_file_size_limit": 100,
+                      "single_file_size_limit_unit": "MB",
+                      "support_data_type": [
+                        "file"
+                      ],
+                      "allowed_file_categories": [
+                        "document",
+                        "pdf",
+                        "text"
+                      ]
+                    }
+                  },
+                  "system_prompt": "你是一个专业的客服助手，请用友好的语气回答用户的问题。根据提供的知识库内容，准确回答用户咨询。如果不确定，请明确告知用户。",
+                  "dolphin": "/explore/(system_prompt=\"#工具调用\n你可以不使用工具直接回答用户问题，也可以调用以下工具回答用户问题：\n##1. 知识库检索工具：\n当用户提出问题时，可以先使用此工具来检索知识库中的内容。\n##2. 执行Web搜索：\n当用户提出需要搜索网络信息时，或者当前的知识不足以回答用户问题时，可以使用此工具，使用Tavily API执行Web搜索并返回结果\n##3. PlantUML图片生成：\n当用户提出生成PlantUML支持的图形时，生成对应的PlantUML脚本。对生成的脚步进行检查，确保脚本的正确性，如果脚本不正确，则重新生成脚本。先看看目前是否有足够的知识或信息来生成对应的脚本，如果有则根据生成的脚本使用\"PlantUML图片生成\"工具来生成并获得图片url。并简单介绍生成的图形，并提供可访问的图片地址。如果当前信息不足以生成，则明确告诉用户无法生成。\n##4. Markdown转HTML：\n将对用户最后的回答内容的markdown内容通过此工具转换为HTML格式，并将html链接返回给用户，让用户点击此链接查看回答内容。要求：1. 如果前面有生成PlantUML图片，则将PlantUML图片链接放在回答内容的最前面，PlantUML图片介绍放在回答内容的后面。2. 只包含回答给用户的内容，不要包含任何其他内容（比如思考过程、工具调用过程等）。\") 要求：当用户想要生成一些图片时，先从知识库中搜索下，然后在从网络中搜下，然后再生成相应的图片（如流程图等）。在直接回答用户的问题后，将回答的内容转换为HTML格式，并提供可访问的HTML链接。调用api接口工具时，注意是http协议还是https协议。用户的问题是：$query ->answer",
+                  "is_dolphin_mode": 0,
+                  "data_source": {
+                    "doc": [
+                      {
+                        "ds_id": "181",
+                        "fields": [
+                          {
+                            "name": "代码规范",
+                            "path": "测试数据/代码规范",
+                            "source": "gns://92EE2D87255142B78A6F1DFB6BBB836B/AEBB543FEA1A4FD9917594CA013FC671"
+                          },
+                          {
+                            "name": "华控数据源",
+                            "path": "测试数据/华控数据源",
+                            "source": "gns://92EE2D87255142B78A6F1DFB6BBB836B/4CB822D4A40340CC924AAC57F60147D3"
+                          }
+                        ]
+                      }
+                    ],
+                    "kg": [
+                      {
+                        "kg_id": "129",
+                        "fields": [
+                          "regions",
+                          "comments"
+                        ],
+                        "output_fields": [
+                          "comments"
+                        ],
+                        "field_properties": {
+                          "regions": [
+                            "※vid",
+                            "regions"
+                          ],
+                          "comments": [
+                            "※vid",
+                            "CONTENT",
+                            "VOTES",
+                            "COMMENT_TIME"
+                          ]
+                        }
+                      }
+                    ],
+                    "advanced_config": {
+                      "doc": {
+                        "document_threshold": -5.5,
+                        "retrieval_slices_num": 150,
+                        "max_slice_per_cite": 16,
+                        "rerank_topk": 15,
+                        "slice_head_num": 0,
+                        "slice_tail_num": 2,
+                        "documents_num": 8,
+                        "retrieval_max_length": 32000
+                      },
+                      "kg": {
+                        "graph_rag_topk": 25,
+                        "long_text_length": 256,
+                        "reranker_sim_threshold": -5.5,
+                        "text_match_entity_nums": 60,
+                        "vector_match_entity_nums": 60,
+                        "retrieval_max_length": 32000
+                      }
+                    }
+                  },
+                  "tools": [
+                    {
+                      "tool_id": "1901300419510927360",
+                      "tool_type": "tool",
+                      "tool_box_id": "1901300419502538752",
+                      "tool_use_description": "使用Tavily API执行Web搜索并返回结果",
+                      "tool_input": null,
+                      "intervention": false
+                    },
+                    {
+                      "tool_id": "tool-123",
+                      "tool_type": "agent",
+                      "tool_box_id": "box-456",
+                      "tool_use_description": "用于查询订单状态的工具",
+                      "tool_input": [
+                        {
+                          "enable": true,
+                          "input_name": "order_id",
+                          "input_type": "string",
+                          "map_type": "var",
+                          "map_value": "query"
+                        }
+                      ],
+                      "intervention": false
+                    }
+                  ],
+                  "llms": [
+                    {
+                      "is_default": true,
+                      "llm_config": {
+                        "id": "1901307417048780800",
+                        "name": "aaron-model-dv3",
+                        "model_type": "llm",
+                        "temperature": 1,
+                        "top_p": 1,
+                        "top_k": 1,
+                        "frequency_penalty": 0,
+                        "presence_penalty": 0,
+                        "max_tokens": 1000
+                      }
+                    },
+                    {
+                      "is_default": false,
+                      "llm_config": {
+                        "id": "1901307417048780801",
+                        "name": "gpt-4",
+                        "model_type": "llm",
+                        "temperature": 0.5,
+                        "top_p": 0.95,
+                        "max_tokens": 2000,
+                        "top_k": 1,
+                        "frequency_penalty": 0,
+                        "presence_penalty": 0
+                      }
+                    }
+                  ],
+                  "is_data_flow_set_enabled": 1,
+                  "opening_remark_config": {
+                    "type": "fixed",
+                    "fixed_opening_remark": "您好！我是智能客服助手，很高兴为您服务。请问有什么可以帮助您的吗？"
+                  },
+                  "preset_questions": [
+                    {
+                      "question": "如何查询我的订单状态？"
+                    },
+                    {
+                      "question": "如何申请退款？"
+                    },
+                    {
+                      "question": "产品有哪些功能？"
+                    }
+                  ],
+                  "output": {
+                    "variables": {
+                      "answer_var": "answer",
+                      "doc_retrieval_var": "doc_retrieval_res",
+                      "graph_retrieval_var": "graph_retrieval_res"
+                    },
+                    "default_format": "markdown"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAgentTpl",
+        "summary": "删除agent模板",
+        "deprecated": false,
+        "description": "删除agent模板",
+        "tags": [
+          "模板"
+        ],
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "../../components/components.yaml#/components/parameters/TplID"
+        }
+      ]
+    },
+    "/agent-factory/v3/agent-tpl/{id}/publish": {
+      "post": {
+        "operationId": "publishAgentTpl",
+        "summary": "发布智能体模板",
+        "description": "发布智能体模板",
+        "tags": [
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/TplID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/publish_upsert_req.yaml#/publish_upsert_req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "发布成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/publish_upsert_res.yaml#/publish_upsert_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent-tpl/{id}/unpublish": {
+      "put": {
+        "operationId": "unpublishAgentTpl",
+        "summary": "取消发布智能体模板",
+        "description": "通过发布 ID 取消已发布的智能体模板",
+        "tags": [
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/TplID"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "取消发布成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent-tpl/{id}/publish-info": {
+      "get": {
+        "operationId": "getPublishInfo",
+        "summary": "获取模板发布信息",
+        "description": "获取模板发布信息",
+        "tags": [
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/TplID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categories": {
+                      "type": "array",
+                      "description": "分类列表",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "分类 ID"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "分类名称"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "获取成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePublishInfo",
+        "summary": "更新模板发布信息",
+        "description": "更新模板发布信息",
+        "tags": [
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/TplID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/publish_upsert_req.yaml#/publish_upsert_req"
+              },
+              "examples": {
+                "example1": {
+                  "value": {
+                    "category_ids": [
+                      "id1",
+                      "id2",
+                      "id3"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "更新成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/publish_upsert_res.yaml#/publish_upsert_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent-tpl/{id}/copy": {
+      "post": {
+        "operationId": "copyAgentTpl",
+        "summary": "复制智能体模板",
+        "description": "复制智能体模板",
+        "tags": [
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/TplID"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "复制成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/copy_res.yaml#/copy_res"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent-permission/list-btn": {
+      "get": {
+        "operationId": "pmsListBtn",
+        "summary": "获取列表中有权限的操作按钮",
+        "description": "- 获取列表中有权限的操作按钮\n  - 这里暂时不针对某个具体的资源实例，而是针对资源类型和所处的场景\n    - 管理权限和具体的资源实例无关，使用权限和数据权限统一（没有使用权限的不展示在列表中）\n",
+        "tags": [
+          "权限-ignore"
+        ],
+        "parameters": [
+          {
+            "name": "resource_type",
+            "in": "query",
+            "description": "- 资源类型\n  - agent: agent  \n  - agent_tpl: agent模板\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "agent",
+                "agent_tpl"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "- 来自（场景）\n  - personal_space: 个人空间\n  - custom_space: 自定义空间\n  - square: 广场\n- 目前resource_type=agent_tpl时，from只能是square和personal_space\n",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "personal_space",
+                "custom_space",
+                "square"
+              ]
+            },
+            "required": true
+          },
+          {
+            "name": "custom_space_id",
+            "in": "query",
+            "description": "自定义空间id（from=custom_space时有效）",
+            "schema": {
+              "type": "string"
+            },
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/list_btn.yaml#/list_btn"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent-permission/execute": {
+      "post": {
+        "operationId": "pmsExecute",
+        "summary": "检查某个agent是否有执行（使用）权限",
+        "deprecated": false,
+        "description": "- 检查某个agent是否有执行（使用）权限\n- 此接口有`内部接口`和`外部接口`\n",
+        "tags": [
+          "权限",
+          "权限-internal"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/check_run_req.yaml#/check_run_req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "is_allowed": {
+                      "type": "boolean",
+                      "description": "是否有执行（使用）权限"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/agent-permission/management/user-status": {
+      "get": {
+        "operationId": "pmsUserStatus",
+        "summary": "获取用户拥有的管理权限状态",
+        "description": "- 获取用户拥有的管理权限状态\n  - 这里暂时不针对某个具体的资源实例，而是针对资源类型\n    - 管理权限和具体的资源实例无关\n",
+        "tags": [
+          "权限",
+          "权限-internal"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/user_status.yaml#/user_status"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/personal-space/agent-list": {
+      "get": {
+        "summary": "个人空间（开发）下Agent列表",
+        "description": "个人空间（开发）下Agent列表",
+        "tags": [
+          "个人空间（开发）"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          },
+          {
+            "name": "publish_status",
+            "description": "发布状态\n- unpublished: |\n  - 未发布（注意包括published_edited）\n- published: 已发布\n- published_edited: 发布后有修改\n",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "unpublished",
+                "published",
+                "published_edited"
+              ]
+            },
+            "required": false
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/name"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/toBeFlag"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/agentCreatedType"
+          },
+          {
+            "name": "pagination_marker_str",
+            "in": "query",
+            "description": "- 分页marker（用于获取下一页数据）\n- base64编码的json字符串\n- base64编码前的json格式：\n  ```\n  {\n    \"updated_at\": 111,\n    \"last_agent_id\": \"xxx\"\n  }\n  ```\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/agent_list.yaml#/agent_list"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/personal-space/agent-tpl-list": {
+      "get": {
+        "summary": "个人空间（开发）下Agent模板列表",
+        "description": "个人空间（开发）下Agent模板列表",
+        "tags": [
+          "个人空间（开发）",
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/name"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/publishStatus"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/agentTplCreatedType"
+          },
+          {
+            "name": "pagination_marker_str",
+            "in": "query",
+            "description": "- 分页marker（用于获取下一页数据）\n- base64编码的json字符串\n- base64编码前的json格式：\n  ```\n  {\n    \"updated_at\": 111,\n    \"last_tpl_id\": 222\n  }\n  ```\n",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/tpl_list.yaml#/tpl_list"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/published/agent": {
+      "post": {
+        "operationId": "getPublishedAgentList_Post",
+        "summary": "已发布智能体列表",
+        "description": "获取广场中的智能体列表",
+        "tags": [
+          "已发布"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/published_agent_list_req.yaml#/published_agent_list_req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/published_agent_list.yaml#/published_agent_list"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/published/agent-tpl": {
+      "get": {
+        "operationId": "getPublishedAgentTplList_Get",
+        "summary": "已发布模板列表",
+        "description": "已发布模板列表",
+        "tags": [
+          "已发布",
+          "模板"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/name"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/categoryID"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          },
+          {
+            "name": "pagination_marker_str",
+            "in": "query",
+            "description": "- 分页marker（用于获取下一页数据）\n- base64编码的json字符串\n- base64编码前的json格式：\n  ```\n  {\n    \"last_pubed_tpl_id\": 111\n  }\n  ```\n",
+            "schema": {
+              "type": "string"
+            },
+            "example": "eyJwdWJsaXNoZWRfYXQiOjE3MTg3NzQ0MDAxMjMsImxhc3RfcmVsZWFzZV9pZCI6IjE0In0="
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/published_tpl_list.yaml#/published_tpl_list"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/published/agent-tpl/{tpl_id}": {
+      "get": {
+        "summary": "已发布模板详情",
+        "description": "已发布模板详情",
+        "tags": [
+          "已发布"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tpl_id",
+            "description": "模板id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/published_tpl_detail.yaml#/published_tpl_detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/published/agent-info-list": {
+      "post": {
+        "summary": "已发布智能体信息列表",
+        "description": "已发布智能体信息列表",
+        "tags": [
+          "已发布"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agent_keys": {
+                    "type": "array",
+                    "description": "agent key数组",
+                    "maxItems": 1000,
+                    "items": {
+                      "type": "string",
+                      "description": "agent key"
+                    }
+                  },
+                  "need_config_fields": {
+                    "type": "array",
+                    "description": "- 需要返回的config下的子字段\n- 目前支持：\n  - \"input\"\n",
+                    "items": {
+                      "type": "string",
+                      "description": "config下的子字段"
+                    },
+                    "default": [
+                      "input"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/published_agent_info_list.yaml#/published_agent_info_list"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent-market/agent/{agent_id}/version/{version}": {
+      "get": {
+        "summary": "智能体详情（已发布或未发布）",
+        "description": "- 智能体详情\n  - 包含已发布和未发布\n",
+        "tags": [
+          "已发布",
+          "agent-internal"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "agent_id",
+            "description": "agent ID / agent key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "description": "agent 版本",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "custom_space_id": null,
+            "in": "query",
+            "name": "custom_space_id",
+            "description": "自定义空间ID（当从自定义空间访问agent时传入）",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../../components/components.yaml#/components/schemas/AgentMarketAgentInfoResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/404"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/agent/{agent_id}/release-history": {
+      "get": {
+        "operationId": "getReleaseHistory",
+        "summary": "获取发布历史记录列表",
+        "description": "获取发布历史记录列表",
+        "tags": [
+          "已发布"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "description": "agent id",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "$ref": "../../components/components.yaml#/components/schemas/ReleaseHistoryListItemResp"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/recent-visit/agent": {
+      "get": {
+        "summary": "获取最近访问的智能体",
+        "description": "获取最近访问的智能体",
+        "tags": [
+          "最近访问"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/name"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/page"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/customSpaceID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "$ref": "../schema/recent_agent_list.yaml#/RecentAgentListResp"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        },
+        "security": []
+      }
+    },
+    "/agent-factory/v3/role": {
+      "get": {
+        "summary": "获取角色列表",
+        "description": "获取角色列表",
+        "tags": [
+          "角色"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/name"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/page"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "../schema/list_item.yaml#/role_list_item"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "总数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建角色",
+        "deprecated": false,
+        "description": "创建角色",
+        "tags": [
+          "角色"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/create_req.yaml#/role_create_req"
+              },
+              "example": {
+                "name": "数据智能体开发角色",
+                "key": "data-agent-dev",
+                "description": "这是一个用于数据智能体开发的协作角色",
+                "members": [
+                  {
+                    "obj_type": "user",
+                    "obj_id": "user123"
+                  },
+                  {
+                    "obj_type": "dept",
+                    "obj_id": "dept456"
+                  }
+                ],
+                "resources": [
+                  {
+                    "resource_type": "agent",
+                    "resource_id": "agent123"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "角色 id"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/role/{id}": {
+      "get": {
+        "summary": "获取角色详情",
+        "deprecated": false,
+        "description": "获取角色详情，包括角色基本信息、成员和资源",
+        "tags": [
+          "角色"
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/detail.yaml#/role_detail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "summary": "编辑角色",
+        "deprecated": false,
+        "description": "编辑角色，包括角色基本信息、成员和资源",
+        "tags": [
+          "角色"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/update_req.yaml#/role_update_req"
+              },
+              "example": {
+                "name": "数据智能体开发角色-更新版",
+                "description": "这是一个更新后的数据智能体开发协作角色",
+                "members": {
+                  "add": [
+                    {
+                      "obj_type": "user",
+                      "obj_id": "user456"
+                    }
+                  ],
+                  "remove": [
+                    {
+                      "obj_type": "user",
+                      "obj_id": "user123"
+                    }
+                  ]
+                },
+                "resources": {
+                  "add": [
+                    {
+                      "resource_type": "agent",
+                      "resource_id": "agent456"
+                    }
+                  ],
+                  "remove": [
+                    {
+                      "resource_type": "agent",
+                      "resource_id": "agent123"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除角色",
+        "deprecated": false,
+        "description": "删除角色",
+        "tags": [
+          "角色"
+        ],
+        "responses": {
+          "204": {
+            "description": "请求成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "../../components/components.yaml#/components/parameters/ID"
+        }
+      ]
+    },
+    "/agent-factory/v3/role/{id}/members": {
+      "get": {
+        "summary": "获取角色成员列表",
+        "deprecated": false,
+        "description": "获取角色成员列表",
+        "tags": [
+          "角色"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/ID"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/page"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "请求成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "../schema/member_item.yaml#/role_member_item"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "总数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "../../components/components.yaml#/components/parameters/ID"
+        }
+      ]
+    },
+    "/agent-factory/v3/role/{id}/resources": {
+      "get": {
+        "summary": "获取角色资源列表",
+        "deprecated": false,
+        "description": "获取角色资源列表",
+        "tags": [
+          "角色"
+        ],
+        "parameters": [
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/ID"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/page"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "../schema/resource_item.yaml#/role_resource_item"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "总数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "$ref": "../../components/components.yaml#/components/parameters/ID"
+        }
+      ]
+    },
+    "/agent-factory/v3/tool-result-process-strategy/category": {
+      "get": {
+        "summary": "获取结果处理策略分类列表",
+        "description": "获取结果处理策略分类列表",
+        "tags": [
+          "工具结果处理策略"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "分类ID"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "分类名称"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "分类描述"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "总数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/agent-factory/v3/tool-result-process-strategy/category/{category_id}/strategy": {
+      "get": {
+        "summary": "根据分类获取结果处理策略列表",
+        "description": "根据分类获取结果处理策略列表",
+        "tags": [
+          "工具结果处理策略"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category_id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "策略分类"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "策略ID"
+                          },
+                          "name": {
+                            "type": "string",
+                            "description": "策略名称"
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "策略描述"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "description": "总数"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/400"
+          },
+          "401": {
+            "$ref": "../../components/components.yaml#/components/responses/401"
+          },
+          "403": {
+            "$ref": "../../components/components.yaml#/components/responses/403"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/500"
+          }
+        }
+      }
+    }
+  }
+}

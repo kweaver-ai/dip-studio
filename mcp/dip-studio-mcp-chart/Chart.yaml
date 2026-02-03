@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dip-studio-mcp
+description: DIP Studio MCP Server - get_context 供 Coding Agent 获取项目上下文
+type: application
+version: 1.0.0-develop
+appVersion: "0.1.0"

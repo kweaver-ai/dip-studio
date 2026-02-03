@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-cm
+  namespace: {{ .Values.namespace }}
+data:
+  # MCP server
+  STUDIO_BASE_URL: "http://{{ index .Values.depServices "dip-studio" "host" }}:{{ index .Values.depServices "dip-studio" "port" }}"

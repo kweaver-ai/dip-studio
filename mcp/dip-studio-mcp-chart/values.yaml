@@ -1,0 +1,43 @@
+namespace: anyshare
+
+labels:
+  deployment:
+    name: dip-studio-mcp
+  pod:
+    app: dip-studio-mcp
+  service:
+    app: dip-studio-mcp
+
+image:
+  registry: acr.aishu.cn
+  repository: dip/dip-studio-mcp
+  tag: "1.0.0-develop"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+name: dip-studio-mcp-deployment
+
+nodeSelector: {}
+
+ports:
+  name: server-port
+  containerPort: 8001
+
+service:
+  name: dip-studio-mcp
+  type: ClusterIP
+  port: 8001
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Studio 内部接口 base URL（get_context 调用）；同 namespace 内可用 http://<service>.<namespace>:<port>
+depServices:
+  dip-studio:
+    host: "dip-studio"
+    port: 8000

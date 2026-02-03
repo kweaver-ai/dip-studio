@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dip-studio
+description: DIP Studio Backend - 项目管理与功能设计文档服务
+type: application
+version: 1.0.0-develop
+appVersion: "0.1.0"

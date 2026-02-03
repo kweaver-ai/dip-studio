@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-cm
+  namespace: {{ .Values.namespace }}
+data:
+  DIP_STUDIO_APP_NAME: "DIP Studio"
+  DIP_STUDIO_APP_VERSION: "0.1.0"
+  DIP_STUDIO_HOST: "0.0.0.0"
+  DIP_STUDIO_PORT: "{{ .Values.ports.containerPort | toString }}"
+  DIP_STUDIO_API_PREFIX: "/api/dip-studio/v1"
+  DIP_STUDIO_DEBUG: "false"
+  DIP_STUDIO_LOG_LEVEL: "INFO"
+  DIP_STUDIO_DB_HOST: {{ .Values.depServices.rds.host | quote }}
+  DIP_STUDIO_DB_PORT: "{{ .Values.depServices.rds.port }}"
+  DIP_STUDIO_DB_NAME: {{ .Values.depServices.rds.database | quote }}
+  DIP_STUDIO_DB_USER: {{ .Values.depServices.rds.user | quote }}
+  DIP_STUDIO_DB_PASSWORD: {{ .Values.depServices.rds.password | quote }}

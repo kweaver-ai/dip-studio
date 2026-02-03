@@ -1,0 +1,12 @@
+server:
+  host: "0.0.0.0"
+  port: 8001
+  transport: "http"
+  # Authentication is disabled - clients can connect directly without tokens
+
+# Studio 内部接口 base URL（get_context 工具调用，K8s 内示例：http://dip-studio.anyshare:8000）
+studio:
+  base_url: "http://localhost:8000"
+
+api_specs:
+  base_path: "./api-specs"  # API规范文档存储路径

@@ -1,0 +1,724 @@
+components:
+  schemas:
+    # ============ 项目 Schema ============
+    Project:
+      summary: 项目信息
+      description: 项目实体，对应数据库表 project
+      type: object
+      properties:
+        id:
+          type: integer
+          title: 项目 ID
+          description: 项目主键 ID
+        name:
+          type: string
+          title: 项目名称
+          description: 项目名称，最多128字符
+          maxLength: 128
+        description:
+          type: string
+          title: 项目描述
+          description: 项目描述，最多400字符
+          maxLength: 400
+        creator:
+          type: integer
+          title: 创建者用户 ID
+          description: 创建该项目的用户 ID
+        created_at:
+          type: string
+          format: date-time
+          title: 创建时间
+          description: 项目创建时间
+        editor:
+          type: integer
+          title: 最近编辑者用户 ID
+          description: 最近编辑该项目的用户 ID
+        edited_at:
+          type: string
+          format: date-time
+          title: 最近编辑时间
+          description: 项目最近编辑时间
+      required:
+        - id
+        - name
+        - creator
+        - created_at
+        - editor
+        - edited_at
+      example:
+        id: 1
+        name: "智能运维平台"
+        description: "DIP for ITOps 智能运维平台项目"
+        creator: 100
+        created_at: "2026-01-15T10:00:00Z"
+        editor: 100
+        edited_at: "2026-01-15T10:00:00Z"
+
+    ProjectList:
+      summary: 项目列表
+      type: array
+      items:
+        $ref: '#/components/schemas/Project'
+
+    CreateProjectRequest:
+      summary: 创建项目请求
+      description: 创建新项目的请求体
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          title: 项目名称
+          description: 项目名称，最多128字符
+          maxLength: 128
+        description:
+          type: string
+          title: 项目描述
+          description: 项目描述，最多400字符
+          maxLength: 400
+      example:
+        name: "智能运维平台"
+        description: "DIP for ITOps 智能运维平台项目"
+
+    UpdateProjectRequest:
+      summary: 更新项目请求
+      description: 更新项目信息的请求体
+      type: object
+      properties:
+        name:
+          type: string
+          title: 项目名称
+          description: 项目名称，最多128字符
+          maxLength: 128
+        description:
+          type: string
+          title: 项目描述
+          description: 项目描述，最多400字符
+          maxLength: 400
+      example:
+        name: "智能运维平台 V2"
+        description: "更新后的项目描述"
+
+    # ============ 节点 Schema ============
+    Node:
+      summary: 项目节点
+      description: 项目节点实体，统一管理 application/page/function 节点
+      type: object
+      properties:
+        id:
+          type: integer
+          title: 节点 ID
+          description: 节点主键 ID
+        project_id:
+          type: integer
+          title: 项目 ID
+          description: 所属项目 ID
+        parent_id:
+          type: [integer, "null"]
+          title: 父节点 ID
+          description: 父节点 ID，根节点为 null
+        node_type:
+          type: string
+          title: 节点类型
+          description: 节点类型
+          enum:
+            - application
+            - page
+            - function
+        name:
+          type: string
+          title: 节点名称
+          description: 节点名称，最多255字符
+          maxLength: 255
+        description:
+          type: string
+          title: 节点描述
+          description: 节点描述
+        path:
+          type: string
+          title: 节点路径
+          description: 节点路径，如 /node_1/node_3/node_8
+        sort:
+          type: integer
+          title: 排序值
+          description: 同级节点的排序值
+        status:
+          type: integer
+          title: 节点状态
+          description: 节点状态
+        document_id:
+          type: [integer, "null"]
+          title: 文档 ID
+          description: 功能节点关联的文档 ID，仅功能节点有值
+        creator:
+          type: integer
+          title: 创建者用户 ID
+        created_at:
+          type: string
+          format: date-time
+          title: 创建时间
+        editor:
+          type: integer
+          title: 最近编辑者用户 ID
+        edited_at:
+          type: string
+          format: date-time
+          title: 最近编辑时间
+      required:
+        - id
+        - project_id
+        - node_type
+        - name
+        - path
+        - sort
+        - status
+        - creator
+        - editor
+      example:
+        id: 1
+        project_id: 1
+        parent_id: null
+        node_type: "application"
+        name: "智能运维应用"
+        description: "主应用节点"
+        path: "/node_1"
+        sort: 0
+        status: 1
+        document_id: null
+        creator: 100
+        created_at: "2026-01-15T10:00:00Z"
+        editor: 100
+        edited_at: "2026-01-15T10:00:00Z"
+
+    NodeTree:
+      summary: 节点树
+      description: 包含子节点的节点树结构
+      type: object
+      properties:
+        id:
+          type: integer
+          title: 节点 ID
+        project_id:
+          type: integer
+          title: 项目 ID
+        parent_id:
+          type: [integer, "null"]
+          title: 父节点 ID
+        node_type:
+          type: string
+          title: 节点类型
+          enum:
+            - application
+            - page
+            - function
+        name:
+          type: string
+          title: 节点名称
+        description:
+          type: string
+          title: 节点描述
+        path:
+          type: string
+          title: 节点路径
+        status:
+          type: integer
+          title: 节点状态
+        document_id:
+          type: [integer, "null"]
+          title: 文档 ID
+          description: 功能节点关联的文档 ID，仅功能节点有值
+        creator:
+          type: integer
+          title: 创建者用户 ID
+        created_at:
+          type: string
+          format: date-time
+          title: 创建时间
+        editor:
+          type: integer
+          title: 最近编辑者用户 ID
+        edited_at:
+          type: string
+          format: date-time
+          title: 最近编辑时间
+        children:
+          type: array
+          title: 子节点列表（按 sort 顺序，响应中不包含 sort）
+          items:
+            $ref: '#/components/schemas/NodeTree'
+      required:
+        - id
+        - project_id
+        - node_type
+        - name
+        - path
+        - status
+        - children
+
+    CreateApplicationNodeRequest:
+      summary: 创建应用节点请求
+      description: 创建应用节点（根节点）的请求体，一个项目只能有一个应用节点
+      type: object
+      required:
+        - project_id
+        - name
+      properties:
+        project_id:
+          type: integer
+          title: 项目 ID
+          description: 所属项目 ID
+        name:
+          type: string
+          title: 节点名称
+          maxLength: 255
+        description:
+          type: string
+          title: 节点描述
+      example:
+        project_id: 1
+        name: "智能运维应用"
+        description: "主应用节点"
+
+    CreatePageNodeRequest:
+      summary: 创建页面节点请求
+      description: 创建页面节点的请求体，只能在应用节点下创建
+      type: object
+      required:
+        - project_id
+        - parent_id
+        - name
+      properties:
+        project_id:
+          type: integer
+          title: 项目 ID
+        parent_id:
+          type: integer
+          title: 父节点 ID
+          description: 必须是应用节点 ID
+        name:
+          type: string
+          title: 节点名称
+          maxLength: 255
+        description:
+          type: string
+          title: 节点描述
+      example:
+        project_id: 1
+        parent_id: 1
+        name: "故障分析页面"
+        description: "故障分析功能页面"
+
+    CreateFunctionNodeRequest:
+      summary: 创建功能节点请求
+      description: 创建功能节点的请求体，只能在页面节点下创建，会自动创建关联的功能设计文档
+      type: object
+      required:
+        - project_id
+        - parent_id
+        - name
+      properties:
+        project_id:
+          type: integer
+          title: 项目 ID
+        parent_id:
+          type: integer
+          title: 父节点 ID
+          description: 必须是页面节点 ID
+        name:
+          type: string
+          title: 节点名称
+          maxLength: 255
+        description:
+          type: string
+          title: 节点描述
+      example:
+        project_id: 1
+        parent_id: 2
+        name: "日志分析功能"
+        description: "分析系统日志的功能"
+
+    UpdateNodeRequest:
+      summary: 更新节点请求
+      description: 更新节点信息的请求体
+      type: object
+      properties:
+        name:
+          type: string
+          title: 节点名称
+          maxLength: 255
+        description:
+          type: string
+          title: 节点描述
+      example:
+        name: "更新后的节点名称"
+        description: "更新后的节点描述"
+
+    MoveNodeRequest:
+      summary: 移动节点请求
+      description: 移动节点到新的父节点下；入参为前置节点 ID，服务端据此重设 sort 入库
+      type: object
+      required:
+        - node_id
+      properties:
+        node_id:
+          type: integer
+          title: 节点 ID
+          description: 要移动的节点 ID
+        new_parent_id:
+          type: [integer, "null"]
+          title: 新父节点 ID
+          description: 新的父节点 ID
+        predecessor_node_id:
+          type: [integer, "null"]
+          title: 前置节点 ID
+          description: 新父节点下的直接子节点，移动后位于该节点之后；不传或 null 表示放到第一个
+      example:
+        node_id: 3
+        new_parent_id: 2
+        predecessor_node_id: 5
+
+    # ============ 词典 Schema ============
+    DictionaryEntry:
+      summary: 词典条目
+      description: 项目词典条目实体
+      type: object
+      properties:
+        id:
+          type: integer
+          title: 条目 ID
+          description: 词典条目主键 ID
+        project_id:
+          type: integer
+          title: 项目 ID
+          description: 所属项目 ID
+        term:
+          type: string
+          title: 术语名称
+          description: 术语名称，最多255字符
+          maxLength: 255
+        definition:
+          type: string
+          title: 术语定义
+          description: 术语的详细定义
+        created_at:
+          type: string
+          format: date-time
+          title: 创建时间
+      required:
+        - id
+        - project_id
+        - term
+        - definition
+      example:
+        id: 1
+        project_id: 1
+        term: "ROI"
+        definition: "投资回报率（Return on Investment）"
+        created_at: "2026-01-15T10:00:00Z"
+
+    DictionaryEntryList:
+      summary: 词典条目列表
+      type: array
+      items:
+        $ref: '#/components/schemas/DictionaryEntry'
+
+    CreateDictionaryEntryRequest:
+      summary: 创建词典条目请求
+      description: 创建新词典条目的请求体
+      type: object
+      required:
+        - project_id
+        - term
+        - definition
+      properties:
+        project_id:
+          type: integer
+          title: 项目 ID
+        term:
+          type: string
+          title: 术语名称
+          maxLength: 255
+        definition:
+          type: string
+          title: 术语定义
+      example:
+        project_id: 1
+        term: "SLA"
+        definition: "服务级别协议（Service Level Agreement）"
+
+    UpdateDictionaryEntryRequest:
+      summary: 更新词典条目请求
+      description: 更新词典条目的请求体
+      type: object
+      properties:
+        term:
+          type: string
+          title: 术语名称
+          maxLength: 255
+        definition:
+          type: string
+          title: 术语定义
+      example:
+        term: "SLA"
+        definition: "更新后的术语定义"
+
+    # ============ 文档 Schema ============
+    JsonPatchOperation:
+      summary: JSON Patch 单条操作
+      description: "RFC 6902 JSON Patch 单条操作。Patch 应用目标为 {\"blocks\": [块数组]}，path 如 /blocks/0、/blocks/0/content、/blocks/-（追加）"
+      type: object
+      required:
+        - op
+        - path
+      properties:
+        op:
+          type: string
+          title: 操作类型
+          enum:
+            - add
+            - remove
+            - replace
+            - move
+            - copy
+            - test
+        path:
+          type: string
+          title: JSON Pointer 路径
+          description: 如 /blocks/0、/blocks/0/content、/blocks/-
+        value:
+          title: 值
+          description: add/replace 等操作需要
+        from:
+          type: string
+          title: 源路径
+          description: move/copy 操作需要
+      example:
+        op: "replace"
+        path: "/blocks/0/content"
+        value:
+          text: "更新后的文本"
+
+    PatchDocumentBlocksRequest:
+      summary: JSON Patch 更新文档块请求
+      description: "RFC 6902 JSON Patch 操作数组，应用目标为 {\"blocks\": [块数组]}"
+      type: array
+      items:
+        $ref: '#/components/schemas/JsonPatchOperation'
+
+    DocumentContentObject:
+      summary: 文档内容对象
+      description: "单 JSON 对象 {}，含任意 kv；创建功能节点时已初始化为空 {}"
+      type: object
+      additionalProperties: true
+
+    PatchDocumentResponse:
+      summary: 文档增量更新响应
+      description: 仅返回是否更新成功
+      type: object
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+          title: 是否更新成功
+      example:
+        success: true
+
+    DocumentBlock:
+      summary: 文档块
+      description: 功能设计文档的内容块，存储在 MariaDB 中
+      type: object
+      properties:
+        id:
+          type: string
+          title: 块 ID
+          description: 块主键 ID（MariaDB BIGINT，API 以字符串返回）
+        document_id:
+          type: integer
+          title: 文档 ID
+          description: 关联的文档 ID
+        type:
+          type: string
+          title: 块类型
+          description: 块类型
+          enum:
+            - text
+            - list
+            - table
+            - plugin
+        content:
+          type: object
+          title: 块内容
+          description: 块的内容数据
+        order:
+          type: integer
+          title: 排序顺序
+          description: 块在文档中的排序顺序
+        updated_at:
+          type: string
+          format: date-time
+          title: 更新时间
+      required:
+        - id
+        - document_id
+        - type
+        - content
+        - order
+      example:
+        id: "507f1f77bcf86cd799439011"
+        document_id: 1
+        type: "text"
+        content:
+          text: "这是一段功能描述文本"
+        order: 1
+        updated_at: "2026-01-15T10:00:00Z"
+
+    FunctionDocument:
+      summary: 功能设计文档
+      description: 功能设计文档实体，元信息与内容块均存储在 MariaDB
+      type: object
+      properties:
+        id:
+          type: integer
+          title: 文档 ID
+          description: 文档主键 ID
+        function_node_id:
+          type: integer
+          title: 功能节点 ID
+          description: 关联的功能节点 ID
+        creator:
+          type: integer
+          title: 创建者用户 ID
+        created_at:
+          type: string
+          format: date-time
+          title: 创建时间
+        editor:
+          type: integer
+          title: 最近编辑者用户 ID
+        edited_at:
+          type: string
+          format: date-time
+          title: 最近编辑时间
+        blocks:
+          type: array
+          title: 文档块列表
+          items:
+            $ref: '#/components/schemas/DocumentBlock'
+      required:
+        - id
+        - function_node_id
+        - creator
+        - editor
+        - blocks
+      example:
+        id: 1
+        function_node_id: 5
+        creator: 100
+        created_at: "2026-01-15T10:00:00Z"
+        editor: 100
+        edited_at: "2026-01-15T10:00:00Z"
+        blocks: []
+
+    DocumentContent:
+      summary: 文档内容（整体 JSON）
+      description: "与 PATCH 操作目标一致的整体 JSON，仅包含 blocks 数组。查询文档与 PATCH 均返回此结构。"
+      type: object
+      required:
+        - blocks
+      properties:
+        blocks:
+          type: array
+          title: 文档块数组
+          items:
+            $ref: '#/components/schemas/DocumentBlock'
+      example:
+        blocks:
+          - id: "507f1f77bcf86cd799439011"
+            document_id: 1
+            type: "text"
+            content:
+              text: "这是一段功能描述文本"
+            order: 0
+            updated_at: "2026-01-15T10:00:00Z"
+
+    # ============ 健康检查 Schema ============
+    HealthResponse:
+      summary: 健康检查响应
+      description: 健康检查接口的响应
+      type: object
+      properties:
+        status:
+          type: string
+          title: 服务状态
+          description: 服务状态
+        version:
+          type: string
+          title: 服务版本
+          description: 服务版本号
+      required:
+        - status
+        - version
+      example:
+        status: "healthy"
+        version: "0.1.0"
+
+    # ============ 错误响应 Schema ============
+    ErrorResponse:
+      summary: 错误响应
+      description: 接口错误信息
+      type: object
+      properties:
+        code:
+          type: string
+          title: 业务错误码
+          description: 业务错误码
+        description:
+          type: string
+          title: 错误描述
+          description: 错误描述
+        solution:
+          type: string
+          title: 解决方案
+          description: 错误处理建议
+        detail:
+          type: object
+          title: 详细信息
+          description: 错误详细信息
+      required:
+        - code
+        - description
+      example:
+        code: "PROJECT_NAME_EXISTS"
+        description: "项目名称已存在"
+        solution: "请使用不同的项目名称"
+
+  errors:
+    ParameterError:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ConflictError:
+      description: 资源冲突
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: 服务器内部错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

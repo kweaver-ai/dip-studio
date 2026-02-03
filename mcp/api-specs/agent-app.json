@@ -1,0 +1,1228 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "AGENT-APP服务 API",
+    "version": "1.0.0",
+    "description": "API to access DIP\n\n如有任何疑问，可到开发者社区提问：https://developers.aishu.cn\n"
+  },
+  "servers": [
+    {
+      "url": "https://{host}:{port}/",
+      "description": "host: DIP服务器IP, port: 默认端口443",
+      "variables": {
+        "host": {
+          "default": "host",
+          "description": "DIP服务器IP"
+        },
+        "port": {
+          "default": "443",
+          "description": "https默认端口443"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "$ref": "../../../../common/common_headers.yaml#/common_header_tag"
+    },
+    {
+      "name": "对话管理"
+    },
+    {
+      "name": "对话session管理"
+    },
+    {
+      "name": "对话"
+    },
+    {
+      "name": "系统"
+    },
+    {
+      "name": "可观测性"
+    },
+    {
+      "name": "自定义错误码汇总"
+    },
+    {
+      "name": "相关文档",
+      "description": "相关文档：\n- [confluence](https://confluence.aishu.cn/pages/viewpage.action?pageId=261242083)\n- [devops](https://devops.aishu.cn/AISHUDevOps/DIP/_workitems/edit/744857)\n"
+    }
+  ],
+  "x-tagGroups": [
+    {
+      "name": "通用说明",
+      "tags": [
+        "公共Header说明"
+      ]
+    },
+    {
+      "name": "AGENT APP",
+      "tags": [
+        "对话管理",
+        "对话session管理",
+        "对话",
+        "系统",
+        "可观测性"
+      ]
+    },
+    {
+      "name": "错误码",
+      "tags": [
+        "自定义错误码汇总"
+      ]
+    },
+    {
+      "name": "相关文档",
+      "tags": [
+        "相关文档"
+      ]
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "健康检查",
+        "tags": [
+          "系统"
+        ],
+        "responses": {
+          "200": {
+            "description": "服务正常"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/conversation/{id}": {
+      "get": {
+        "summary": "获取对话详情",
+        "tags": [
+          "对话管理"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "对话ID"
+          },
+          {
+            "$ref": "../schema/common.yaml#/components/PathAppKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "对话获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/conversation_detail.yaml#/ConversationDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "summary": "编辑对话(修改标题)",
+        "tags": [
+          "对话管理"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "对话ID"
+          },
+          {
+            "$ref": "../schema/common.yaml#/components/PathAppKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "对话标题"
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "成功"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除对话",
+        "tags": [
+          "对话管理"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "对话 ID"
+          },
+          {
+            "$ref": "../schema/common.yaml#/components/PathAppKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "删除成功"
+          },
+          "404": {
+            "description": "对话不存在",
+            "$ref": "../../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/conversation": {
+      "get": {
+        "summary": "获取对话列表",
+        "tags": [
+          "对话管理"
+        ],
+        "parameters": [
+          {
+            "$ref": "../schema/common.yaml#/components/PathAppKey"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageOffset"
+          },
+          {
+            "$ref": "../../components/components.yaml#/components/parameters/pageLimit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "对话列表获取成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/conversation_list_response.yaml#/ConversationListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "summary": "初始化对话",
+        "tags": [
+          "对话管理"
+        ],
+        "parameters": [
+          {
+            "$ref": "../schema/common.yaml#/components/PathAppKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "对话标题"
+                  }
+                },
+                "required": [
+                  "title"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "初始化对话",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/conversation_init_response.yaml#/ConversationInitResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "summary": "删除所有对话",
+        "tags": [
+          "对话管理"
+        ],
+        "responses": {
+          "204": {
+            "description": "所有对话删除成功"
+          },
+          "500": {
+            "description": "服务器内部错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/conversation/{id}/mark_read": {
+      "put": {
+        "summary": "标记对话已读",
+        "tags": [
+          "对话管理"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "对话ID"
+          },
+          {
+            "$ref": "../schema/common.yaml#/components/PathAppKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "latest_read_index": {
+                    "type": "int",
+                    "description": "已读消息下标"
+                  }
+                },
+                "required": [
+                  "latest_read_index"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "成功"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/conversation/session/{conversation_id}": {
+      "put": {
+        "summary": "管理对话session",
+        "tags": [
+          "对话session管理"
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "对话ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/manage_req.yaml#/ConversationSessionManageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "对话session管理成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/manage_resp.yaml#/ConversationSessionManageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/chat/completion": {
+      "post": {
+        "summary": "对话",
+        "tags": [
+          "对话"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "agent app key(通用agent传入 agent id，超级助手传入固定字符串:super_assistant)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/chat_request_v2.yaml#/ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/chat_response_v2.yaml#/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/debug/completion": {
+      "post": {
+        "summary": "调试",
+        "tags": [
+          "对话"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "agent app key(通用agent传入 agent id)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/debug_request.yaml#/DebugRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/debug_response.yaml#/DebugResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/api/chat/completion": {
+      "post": {
+        "summary": "APIChat",
+        "tags": [
+          "对话"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "agent app key(通用agent传入 agent id，超级助手传入固定字符串:super_assistant)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "../schema/api_chat_request.yaml#/APIChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/chat_response_v2.yaml#/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/chat/termination": {
+      "post": {
+        "summary": "终止对话",
+        "tags": [
+          "对话"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "conversation_id": {
+                    "type": "string",
+                    "description": "conversation_id"
+                  }
+                },
+                "required": [
+                  "conversation_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "成功"
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          },
+          "404": {
+            "$ref": "../../components/components.yaml#/components/responses/NotFoundError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}": {
+      "get": {
+        "summary": "获取agent_app详情",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "agent app key(通用agent传入 agent id，超级助手传入固定字符串:super_assistant)"
+          }
+        ],
+        "tags": [
+          "Agent应用管理"
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/agent_app_response.yaml#/AgentAppResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/chat/resume": {
+      "post": {
+        "summary": "对话恢复",
+        "tags": [
+          "对话"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "agent app key(通用agent传入 agent id，超级助手传入固定字符串:super_assistant)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "conversation_id": {
+                    "type": "string",
+                    "description": "conversation_id"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "../schema/chat_response_v2.yaml#/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/app/{app_key}/api/doc": {
+      "post": {
+        "summary": "获取Agent Api文档",
+        "tags": [
+          "对话"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "app_key",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "description": "agent app key(通用agent传入 agent id，超级助手传入固定字符串:super_assistant)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agent_id": {
+                    "type": "string",
+                    "description": "agent id"
+                  },
+                  "agent_version": {
+                    "type": "string",
+                    "description": "agent version"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "返回结果:open api文档"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/file/check": {
+      "post": {
+        "summary": "文件检查",
+        "tags": [
+          "对话"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "文件id",
+                      "required": true
+                    }
+                  }
+                }
+              },
+              "example": [
+                {
+                  "id": "97E09222FC9B45899670E698AF89D113"
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "文件上传进度",
+                  "properties": {
+                    "progress": {
+                      "type": "number",
+                      "description": "进度 (0-100)"
+                    },
+                    "process_info": {
+                      "type": "array",
+                      "description": "处理信息",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "文件id"
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "处理状态",
+                            "enum": [
+                              "processing",
+                              "completed",
+                              "failed"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "progress": 100,
+                  "process_info": [
+                    {
+                      "id": "97E09222FC9B45899670E698AF89D113",
+                      "status": "completed"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "../../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/observability/agent/{agent_id}/detail": {
+      "post": {
+        "summary": "查询指定Agent的可观测信息",
+        "description": "查询指定Agent的可观测信息，返回结果包含Agent的配置信息以及可观测性的指标，支持时间过滤",
+        "operationId": "getAgentObservability",
+        "tags": [
+          "可观测性"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Agent ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schema/agent_observability_req.yaml#/AgentObservabilityReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回Agent可观测信息",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schema/agent_observability_resp.yaml#/AgentObservabilityResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/observability/agent/{agent_key}/conversation": {
+      "post": {
+        "summary": "查询Agent下的所有对话列表",
+        "description": "查询Agent下的所有对话列表，支持分页和根据对话title模糊查询",
+        "operationId": "getConversationList",
+        "tags": [
+          "可观测性"
+        ],
+        "parameters": [
+          {
+            "name": "agent_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Agent Key"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schema/conversation_list_observability_req.yaml#/ConversationListObservabilityReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回对话列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schema/conversation_list_observability_resp.yaml#/ConversationListObservabilityResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/observability/agent/{agent_id}/conversation/{conversation_id}/session": {
+      "post": {
+        "summary": "获取指定对话的session列表",
+        "description": "获取指定对话的session列表，包含session的详细信息",
+        "operationId": "getSessionList",
+        "tags": [
+          "可观测性"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Agent ID"
+          },
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "对话ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schema/session_list_observability_req.yaml#/SessionListObservabilityReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回session列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schema/session_list_observability_resp.yaml#/SessionListObservabilityResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/observability/agent/{agent_id}/conversation/{conversation_id}/session/{session_id}/detail": {
+      "post": {
+        "summary": "获取指定session的详情信息",
+        "description": "获取指定session的详情信息，包含多个指标",
+        "operationId": "getSessionDetail",
+        "tags": [
+          "可观测性"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Agent ID"
+          },
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "对话ID"
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Session ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schema/session_detail_observability_req.yaml#/SessionDetailObservabilityReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回session详情",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schema/session_detail_observability_resp.yaml#/SessionDetailObservabilityResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/observability/agent/{agent_id}/conversation/{conversation_id}/session/{session_id}/run": {
+      "post": {
+        "summary": "获取指定session下的run列表",
+        "description": "获取指定对话的session下的run列表，返回每个run的详情列表",
+        "operationId": "getRunList",
+        "tags": [
+          "可观测性"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Agent ID"
+          },
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "对话ID"
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Session ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schema/run_list_observability_req.yaml#/RunListObservabilityReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回run列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schema/run_list_observability_resp.yaml#/RunListObservabilityResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/api/agent-app/v1/observability/agent/{agent_id}/conversation/{conversation_id}/session/{session_id}/run/{run_id}/detail": {
+      "post": {
+        "summary": "获取指定run的详情信息",
+        "description": "获取指定run的详情信息，包含run的完整信息",
+        "operationId": "getRunDetail",
+        "tags": [
+          "可观测性"
+        ],
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Agent ID"
+          },
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "对话ID"
+          },
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Session ID"
+          },
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Run ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "./schema/run_detail_observability_req.yaml#/RunDetailObservabilityReq"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功返回run详情",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "./schema/run_detail_observability_resp.yaml#/RunDetailObservabilityResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "../components/components.yaml#/components/responses/BadRequestError"
+          },
+          "404": {
+            "$ref": "../components/components.yaml#/components/responses/NotFoundError"
+          },
+          "500": {
+            "$ref": "../components/components.yaml#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ]
+}

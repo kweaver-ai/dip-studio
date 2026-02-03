@@ -1,0 +1,47 @@
+namespace: anyshare
+
+labels:
+  deployment:
+    name: dip-studio
+  pod:
+    app: dip-studio
+  service:
+    app: dip-studio
+
+image:
+  registry: acr.aishu.cn
+  repository: dip/dip-studio
+  tag: "1.0.0-develop"
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+name: dip-studio-deployment
+
+nodeSelector: {}
+
+ports:
+  name: server-port
+  containerPort: 8000
+
+service:
+  name: dip-studio
+  type: ClusterIP
+  port: 8000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1
+    memory: 1Gi
+
+depServices:
+  class-443:
+    ingressClass: class-443
+  rds:
+    host: mariadb-mariadb-master.resource
+    port: 3330
+    user: anyshare
+    password: eisoo.com123
+    database: dip
