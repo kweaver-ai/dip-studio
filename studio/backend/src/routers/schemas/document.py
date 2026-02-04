@@ -54,9 +54,11 @@ class FunctionDocumentResponse(BaseModel):
     """功能设计文档响应（含元信息，内部使用）。"""
     id: int = Field(..., description="文档 ID")
     function_node_id: int = Field(..., description="功能节点 ID")
-    creator: int = Field(..., description="创建者用户 ID")
+    creator_id: str = Field("", description="创建者用户 ID（UUID）")
+    creator_name: str = Field("", description="创建者用户显示名")
     created_at: Optional[datetime] = Field(None, description="创建时间")
-    editor: int = Field(..., description="最近编辑者用户 ID")
+    editor_id: str = Field("", description="最近编辑者用户 ID（UUID）")
+    editor_name: str = Field("", description="最近编辑者用户显示名")
     edited_at: Optional[datetime] = Field(None, description="最近编辑时间")
     blocks: List[DocumentBlockResponse] = Field(default_factory=list, description="文档块列表")
 

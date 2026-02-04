@@ -11,7 +11,7 @@ from starlette.responses import Response
 
 from src.application.project_service import ProjectService
 from src.infrastructure.exceptions import NotFoundError, ValidationError, ConflictError, InternalError
-from src.infrastructure.context import get_user_id
+from src.infrastructure.context import get_user_id, get_user_name
 from src.routers.schemas.project import (
     CreateProjectRequest,
     UpdateProjectRequest,
@@ -40,9 +40,11 @@ def create_project_router(project_service: ProjectService) -> APIRouter:
             id=project.id,
             name=project.name,
             description=project.description,
-            creator=project.creator,
+            creator_id=project.creator_id,
+            creator_name=project.creator_name,
             created_at=project.created_at,
-            editor=project.editor,
+            editor_id=project.editor_id,
+            editor_name=project.editor_name,
             edited_at=project.edited_at,
         )
 
@@ -64,7 +66,8 @@ def create_project_router(project_service: ProjectService) -> APIRouter:
             project = await project_service.create_project(
                 name=request.name,
                 description=request.description,
-                creator=get_user_id(),
+                creator_id=get_user_id(),
+                creator_name=get_user_name(),
             )
             return _project_to_response(project)
         except ValueError as e:
@@ -144,7 +147,8 @@ def create_project_router(project_service: ProjectService) -> APIRouter:
                 project_id=project_id,
                 name=request.name,
                 description=request.description,
-                editor=get_user_id(),
+                editor_id=get_user_id(),
+                editor_name=get_user_name(),
             )
             return _project_to_response(project)
         except ValueError as e:

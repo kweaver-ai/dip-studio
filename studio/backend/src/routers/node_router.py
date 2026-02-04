@@ -11,7 +11,7 @@ from fastapi.responses import Response
 
 from src.application.node_service import NodeService
 from src.infrastructure.exceptions import NotFoundError, ValidationError, InternalError
-from src.infrastructure.context import get_user_id
+from src.infrastructure.context import get_user_id, get_user_name
 from src.routers.schemas.node import (
     CreateApplicationNodeRequest,
     CreatePageNodeRequest,
@@ -51,9 +51,11 @@ def create_node_router(node_service: NodeService) -> APIRouter:
             sort=node.sort,
             status=node.status,
             document_id=node.document_id,
-            creator=node.creator,
+            creator_id=node.creator_id,
+            creator_name=node.creator_name,
             created_at=node.created_at,
-            editor=node.editor,
+            editor_id=node.editor_id,
+            editor_name=node.editor_name,
             edited_at=node.edited_at,
         )
 
@@ -96,7 +98,8 @@ def create_node_router(node_service: NodeService) -> APIRouter:
                 project_id=request.project_id,
                 name=request.name,
                 description=request.description,
-                creator=get_user_id(),
+                creator_id=get_user_id(),
+                creator_name=get_user_name(),
             )
             return _node_to_response(node)
         except ValueError as e:
@@ -130,7 +133,8 @@ def create_node_router(node_service: NodeService) -> APIRouter:
                 parent_id=request.parent_id,
                 name=request.name,
                 description=request.description,
-                creator=get_user_id(),
+                creator_id=get_user_id(),
+                creator_name=get_user_name(),
             )
             return _node_to_response(node)
         except ValueError as e:
@@ -164,7 +168,8 @@ def create_node_router(node_service: NodeService) -> APIRouter:
                 parent_id=request.parent_id,
                 name=request.name,
                 description=request.description,
-                creator=get_user_id(),
+                creator_id=get_user_id(),
+                creator_name=get_user_name(),
             )
             return _node_to_response(node)
         except ValueError as e:
@@ -198,7 +203,8 @@ def create_node_router(node_service: NodeService) -> APIRouter:
                 node_id=node_id,
                 name=request.name,
                 description=request.description,
-                editor=get_user_id(),
+                editor_id=get_user_id(),
+                editor_name=get_user_name(),
             )
             return _node_to_response(node)
         except ValueError as e:
@@ -232,7 +238,8 @@ def create_node_router(node_service: NodeService) -> APIRouter:
                 node_id=request.node_id,
                 new_parent_id=request.new_parent_id,
                 predecessor_node_id=request.predecessor_node_id,
-                editor=get_user_id(),
+                editor_id=get_user_id(),
+                editor_name=get_user_name(),
             )
             return _node_to_response(node)
         except ValueError as e:
@@ -306,9 +313,11 @@ def create_project_nodes_router(node_service: NodeService) -> APIRouter:
             path=node.path,
             status=node.status,
             document_id=node.document_id,
-            creator=node.creator,
+            creator_id=node.creator_id,
+            creator_name=node.creator_name,
             created_at=node.created_at,
-            editor=node.editor,
+            editor_id=node.editor_id,
+            editor_name=node.editor_name,
             edited_at=node.edited_at,
             children=[_node_to_tree_response(child) for child in node.children],
         )

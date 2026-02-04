@@ -193,6 +193,8 @@ class NodePort(ABC):
         node_id: int,
         new_parent_id: Optional[int],
         new_sort: int,
+        editor_id: str = "",
+        editor_name: str = "",
     ) -> ProjectNode:
         """
         移动节点到新的父节点下。
@@ -201,6 +203,8 @@ class NodePort(ABC):
             node_id: 节点 ID
             new_parent_id: 新父节点 ID
             new_sort: 新的排序值
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             ProjectNode: 移动后的节点实体

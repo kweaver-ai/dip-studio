@@ -38,7 +38,7 @@ class ProjectAdapter(ProjectPort):
 
         参数:
             row: 数据库查询结果行
-                (id, name, description, creator, created_at, editor, edited_at)
+                (id, name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at)
 
         返回:
             Project: 项目领域模型
@@ -47,10 +47,12 @@ class ProjectAdapter(ProjectPort):
             id=row[0],
             name=row[1],
             description=row[2],
-            creator=row[3],
-            created_at=row[4],
-            editor=row[5],
-            edited_at=row[6],
+            creator_id=row[3] or "",
+            creator_name=row[4] or "",
+            created_at=row[5],
+            editor_id=row[6] or "",
+            editor_name=row[7] or "",
+            edited_at=row[8],
         )
 
     async def get_all_projects(self) -> List[Project]:
@@ -59,7 +61,7 @@ class ProjectAdapter(ProjectPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, name, description, creator, created_at, editor, edited_at
+                    """SELECT id, name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM project
                        ORDER BY edited_at DESC"""
                 )
@@ -79,7 +81,7 @@ class ProjectAdapter(ProjectPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, name, description, creator, created_at, editor, edited_at
+                    """SELECT id, name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM project
                        WHERE id = %s""",
                     (project_id,)
@@ -95,7 +97,7 @@ class ProjectAdapter(ProjectPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, name, description, creator, created_at, editor, edited_at
+                    """SELECT id, name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM project
                        WHERE name = %s""",
                     (name,)
@@ -117,14 +119,16 @@ class ProjectAdapter(ProjectPort):
                 now = datetime.now()
                 await cursor.execute(
                     """INSERT INTO project 
-                       (name, description, creator, created_at, editor, edited_at)
-                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                       (name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
                         project.name,
                         project.description,
-                        project.creator,
+                        project.creator_id,
+                        project.creator_name,
                         now,
-                        project.editor or project.creator,
+                        project.editor_id or project.creator_id,
+                        project.editor_name or project.creator_name,
                         now,
                     )
                 )
@@ -146,12 +150,13 @@ class ProjectAdapter(ProjectPort):
                 now = datetime.now()
                 await cursor.execute(
                     """UPDATE project 
-                       SET name = %s, description = %s, editor = %s, edited_at = %s
+                       SET name = %s, description = %s, editor_id = %s, editor_name = %s, edited_at = %s
                        WHERE id = %s""",
                     (
                         project.name,
                         project.description,
-                        project.editor,
+                        project.editor_id,
+                        project.editor_name,
                         now,
                         project.id,
                     )
