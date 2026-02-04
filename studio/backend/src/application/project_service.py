@@ -82,7 +82,8 @@ class ProjectService:
         self,
         name: str,
         description: Optional[str] = None,
-        creator: int = 0,
+        creator_id: str = "",
+        creator_name: str = "",
     ) -> Project:
         """
         创建新项目。
@@ -90,7 +91,8 @@ class ProjectService:
         参数:
             name: 项目名称
             description: 项目描述
-            creator: 创建者用户 ID
+            creator_id: 创建者用户 ID（UUID 字符串）
+            creator_name: 创建者用户显示名
 
         返回:
             Project: 创建后的项目实体
@@ -102,7 +104,8 @@ class ProjectService:
             id=0,
             name=name,
             description=description,
-            creator=creator,
+            creator_id=creator_id,
+            creator_name=creator_name,
         )
         project.validate()
         
@@ -113,7 +116,8 @@ class ProjectService:
         project_id: int,
         name: Optional[str] = None,
         description: Optional[str] = None,
-        editor: int = 0,
+        editor_id: str = "",
+        editor_name: str = "",
     ) -> Project:
         """
         更新项目信息。
@@ -122,7 +126,8 @@ class ProjectService:
             project_id: 项目主键 ID
             name: 新的项目名称
             description: 新的项目描述
-            editor: 编辑者用户 ID
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             Project: 更新后的项目实体
@@ -132,9 +137,14 @@ class ProjectService:
         """
         # 获取现有项目
         project = await self._project_port.get_project_by_id(project_id)
-        
+
         # 更新字段
-        project.update(name=name, description=description, editor=editor)
+        project.update(
+            name=name,
+            description=description,
+            editor_id=editor_id,
+            editor_name=editor_name,
+        )
         project.validate()
         
         return await self._project_port.update_project(project)
