@@ -33,10 +33,14 @@ CREATE TABLE IF NOT EXISTS project (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(128) NOT NULL UNIQUE COMMENT '项目名称',
     description VARCHAR(400) COMMENT '项目描述',
-    creator BIGINT NOT NULL COMMENT '创建者用户 ID',
+    creator_id CHAR(36) NOT NULL COMMENT '创建者用户ID(UUID)',
+    creator_name VARCHAR(128) NOT NULL COMMENT '创建者用户显示名',
     created_at DATETIME NOT NULL COMMENT '创建时间',
-    editor BIGINT NOT NULL COMMENT '最近编辑者用户 ID',
-    edited_at DATETIME NOT NULL COMMENT '最近编辑时间'
+    editor_id CHAR(36) NOT NULL COMMENT '最近编辑者用户ID(UUID)',
+    editor_name VARCHAR(128) NOT NULL COMMENT '最近编辑者用户显示名',
+    edited_at DATETIME NOT NULL COMMENT '最近编辑时间',
+    INDEX idx_creator_id (creator_id),
+    INDEX idx_editor_id (editor_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目表';
 
 -- 节点表 (统一管理 application/page/function)
@@ -51,14 +55,18 @@ CREATE TABLE IF NOT EXISTS project_node (
     sort INT DEFAULT 0 COMMENT '同级排序',
     status TINYINT DEFAULT 1 COMMENT '节点状态',
     document_id BIGINT DEFAULT NULL COMMENT '功能节点关联的文档 ID',
-    creator BIGINT COMMENT '创建者用户 ID',
+    creator_id CHAR(36) DEFAULT NULL COMMENT '创建者用户ID(UUID)',
+    creator_name VARCHAR(128) DEFAULT NULL COMMENT '创建者用户显示名',
     created_at DATETIME COMMENT '创建时间',
-    editor BIGINT COMMENT '最近编辑者用户 ID',
+    editor_id CHAR(36) DEFAULT NULL COMMENT '最近编辑者用户ID(UUID)',
+    editor_name VARCHAR(128) DEFAULT NULL COMMENT '最近编辑者用户显示名',
     edited_at DATETIME COMMENT '最近编辑时间',
     INDEX idx_project(project_id),
     INDEX idx_parent(parent_id),
     INDEX idx_path(path(255)),
-    INDEX idx_document_id(document_id)
+    INDEX idx_document_id(document_id),
+    INDEX idx_creator_id (creator_id),
+    INDEX idx_editor_id (editor_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目节点表';
 
 -- 节点类型约束表
@@ -72,9 +80,11 @@ CREATE TABLE IF NOT EXISTS node_type (
 CREATE TABLE IF NOT EXISTS function_document (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     function_node_id BIGINT UNIQUE NOT NULL COMMENT '关联的功能节点 ID',
-    creator BIGINT COMMENT '创建者用户 ID',
+    creator_id CHAR(36) DEFAULT NULL COMMENT '创建者用户ID(UUID)',
+    creator_name VARCHAR(128) DEFAULT NULL COMMENT '创建者用户显示名',
     created_at DATETIME COMMENT '创建时间',
-    editor BIGINT COMMENT '最近编辑者用户 ID',
+    editor_id CHAR(36) DEFAULT NULL COMMENT '最近编辑者用户ID(UUID)',
+    editor_name VARCHAR(128) DEFAULT NULL COMMENT '最近编辑者用户显示名',
     edited_at DATETIME COMMENT '最近编辑时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='功能设计文档表';
 
@@ -84,7 +94,12 @@ CREATE TABLE IF NOT EXISTS dictionary (
     project_id BIGINT NOT NULL COMMENT '所属项目 ID',
     term VARCHAR(255) NOT NULL COMMENT '术语名称',
     definition TEXT NOT NULL COMMENT '术语定义',
+    creator_id CHAR(36) DEFAULT NULL COMMENT '创建者用户ID(UUID)',
+    creator_name VARCHAR(128) DEFAULT NULL COMMENT '创建者用户显示名',
     created_at DATETIME COMMENT '创建时间',
+    editor_id CHAR(36) DEFAULT NULL COMMENT '最近编辑者用户ID(UUID)',
+    editor_name VARCHAR(128) DEFAULT NULL COMMENT '最近编辑者用户显示名',
+    edited_at DATETIME COMMENT '最近编辑时间',
     UNIQUE KEY uk_project_term(project_id, term)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目词典表';
 
@@ -188,9 +203,9 @@ async def init_mariadb(settings):
                 "project_node",
                 "node_type",
                 "function_document",
-                "dictionary",
                 "document_content",
                 "document_block",
+                "dictionary",
             ]
             await cursor.execute(
                 """

@@ -88,7 +88,8 @@ class NodeService:
         project_id: int,
         name: str,
         description: Optional[str] = None,
-        creator: int = 0,
+        creator_id: str = "",
+        creator_name: str = "",
     ) -> ProjectNode:
         """
         创建应用节点（根节点）。
@@ -99,7 +100,8 @@ class NodeService:
             project_id: 项目 ID
             name: 节点名称
             description: 节点描述
-            creator: 创建者用户 ID
+            creator_id: 创建者用户 ID（UUID 字符串）
+            creator_name: 创建者用户显示名
 
         返回:
             ProjectNode: 创建后的节点
@@ -124,7 +126,8 @@ class NodeService:
             parent_id=None,
             description=description,
             sort=0,
-            creator=creator,
+            creator_id=creator_id,
+            creator_name=creator_name,
         )
         node.validate()
         
@@ -136,7 +139,8 @@ class NodeService:
         parent_id: int,
         name: str,
         description: Optional[str] = None,
-        creator: int = 0,
+        creator_id: str = "",
+        creator_name: str = "",
     ) -> ProjectNode:
         """
         创建页面节点。
@@ -148,7 +152,8 @@ class NodeService:
             parent_id: 父节点 ID（必须是应用节点）
             name: 节点名称
             description: 节点描述
-            creator: 创建者用户 ID
+            creator_id: 创建者用户 ID（UUID 字符串）
+            creator_name: 创建者用户显示名
 
         返回:
             ProjectNode: 创建后的节点
@@ -174,7 +179,8 @@ class NodeService:
             parent_id=parent_id,
             description=description,
             sort=max_sort + 1,
-            creator=creator,
+            creator_id=creator_id,
+            creator_name=creator_name,
         )
         node.validate()
         node.validate_parent(parent)
@@ -187,7 +193,8 @@ class NodeService:
         parent_id: int,
         name: str,
         description: Optional[str] = None,
-        creator: int = 0,
+        creator_id: str = "",
+        creator_name: str = "",
     ) -> ProjectNode:
         """
         创建功能节点。
@@ -199,7 +206,8 @@ class NodeService:
             parent_id: 父节点 ID（必须是页面节点）
             name: 节点名称
             description: 节点描述
-            creator: 创建者用户 ID
+            creator_id: 创建者用户 ID（UUID 字符串）
+            creator_name: 创建者用户显示名
 
         返回:
             ProjectNode: 创建后的节点
@@ -225,7 +233,8 @@ class NodeService:
             parent_id=parent_id,
             description=description,
             sort=max_sort + 1,
-            creator=creator,
+            creator_id=creator_id,
+            creator_name=creator_name,
         )
         node.validate()
         node.validate_parent(parent)
@@ -238,7 +247,8 @@ class NodeService:
             document = FunctionDocument(
                 id=0,
                 function_node_id=node.id,
-                creator=creator,
+                creator_id=creator_id,
+                creator_name=creator_name,
             )
             await self._document_port.create_document(document)
             if self._document_content_port:

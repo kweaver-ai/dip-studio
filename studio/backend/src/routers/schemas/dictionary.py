@@ -32,5 +32,6 @@ class DictionaryEntryResponse(BaseModel):
     term: str = Field(..., description="术语名称")
     definition: str = Field(..., description="术语定义")
     created_at: Optional[datetime] = Field(None, description="创建时间")
+     edited_at: Optional[datetime] = Field(None, description="最近编辑时间")
 
     model_config = ConfigDict(from_attributes=True)

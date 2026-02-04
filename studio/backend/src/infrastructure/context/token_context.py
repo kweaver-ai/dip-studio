@@ -13,10 +13,14 @@ from typing import Optional, Dict, Any
 class UserInfo:
     """
     用户信息。
-    
+
     存储从认证系统获取的用户基本信息。
+
+    说明:
+        - id: 用户 ID，UUID 字符串
+        - vision_name: 用户显示名称
     """
-    id: int
+    id: str
     account: str = ""
     vision_name: str = ""
     roles: Optional[Dict[str, bool]] = None
@@ -135,14 +139,27 @@ def get_user_info() -> Optional[UserInfo]:
     return UserContext.get_user_info()
 
 
-def get_user_id() -> int:
+def get_user_id() -> str:
     """
-    便捷函数：获取当前上下文的用户ID。
-    
+    便捷函数：获取当前上下文的用户ID（UUID 字符串）。
+
     返回:
-        int: 用户ID，如果未设置则返回0
+        str: 用户ID（UUID 字符串），如果未设置则返回空字符串
     """
     user_info = UserContext.get_user_info()
-    if user_info is not None:
-        return user_info.id
-    return 0
+    if user_info is not None and user_info.id is not None:
+        return str(user_info.id)
+    return ""
+
+
+def get_user_name() -> str:
+    """
+    便捷函数：获取当前上下文的用户显示名称。
+
+    返回:
+        str: 用户显示名称，如果未设置则返回空字符串
+    """
+    user_info = UserContext.get_user_info()
+    if user_info is not None and user_info.vision_name:
+        return user_info.vision_name
+    return ""

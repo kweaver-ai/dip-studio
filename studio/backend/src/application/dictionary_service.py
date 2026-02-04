@@ -67,6 +67,8 @@ class DictionaryService:
         project_id: int,
         term: str,
         definition: str,
+        creator_id: str = "",
+        creator_name: str = "",
     ) -> DictionaryEntry:
         """
         创建新的词典条目。
@@ -75,6 +77,8 @@ class DictionaryService:
             project_id: 项目 ID
             term: 术语名称
             definition: 术语定义
+            creator_id: 创建者用户 ID（UUID 字符串）
+            creator_name: 创建者用户显示名
 
         返回:
             DictionaryEntry: 创建后的词典条目
@@ -91,6 +95,8 @@ class DictionaryService:
             project_id=project_id,
             term=term,
             definition=definition,
+            creator_id=creator_id,
+            creator_name=creator_name,
         )
         entry.validate()
         
@@ -101,6 +107,8 @@ class DictionaryService:
         entry_id: int,
         term: Optional[str] = None,
         definition: Optional[str] = None,
+        editor_id: str = "",
+        editor_name: str = "",
     ) -> DictionaryEntry:
         """
         更新词典条目。
@@ -109,6 +117,8 @@ class DictionaryService:
             entry_id: 条目 ID
             term: 新的术语名称
             definition: 新的术语定义
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             DictionaryEntry: 更新后的词典条目
@@ -118,9 +128,14 @@ class DictionaryService:
         """
         # 获取现有条目
         entry = await self._dictionary_port.get_entry_by_id(entry_id)
-        
+
         # 更新字段
-        entry.update(term=term, definition=definition)
+        entry.update(
+            term=term,
+            definition=definition,
+            editor_id=editor_id,
+            editor_name=editor_name,
+        )
         entry.validate()
         
         return await self._dictionary_port.update_entry(entry)

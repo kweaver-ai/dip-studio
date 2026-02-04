@@ -41,6 +41,7 @@ def create_dictionary_router(dictionary_service: DictionaryService) -> APIRouter
             term=entry.term,
             definition=entry.definition,
             created_at=entry.created_at,
+            edited_at=entry.edited_at,
         )
 
     @router.post(

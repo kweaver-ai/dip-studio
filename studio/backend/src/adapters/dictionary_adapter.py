@@ -38,7 +38,7 @@ class DictionaryAdapter(DictionaryPort):
 
         参数:
             row: 数据库查询结果行
-                (id, project_id, term, definition, created_at)
+                (id, project_id, term, definition, created_at, edited_at)
 
         返回:
             DictionaryEntry: 词典条目领域模型
@@ -49,6 +49,7 @@ class DictionaryAdapter(DictionaryPort):
             term=row[2],
             definition=row[3],
             created_at=row[4],
+            edited_at=row[5],
         )
 
     async def get_entries_by_project_id(self, project_id: int) -> List[DictionaryEntry]:
@@ -57,7 +58,7 @@ class DictionaryAdapter(DictionaryPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, project_id, term, definition, created_at
+                    """SELECT id, project_id, term, definition, created_at, edited_at
                        FROM dictionary
                        WHERE project_id = %s
                        ORDER BY term""",
@@ -79,7 +80,7 @@ class DictionaryAdapter(DictionaryPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, project_id, term, definition, created_at
+                    """SELECT id, project_id, term, definition, created_at, edited_at
                        FROM dictionary
                        WHERE id = %s""",
                     (entry_id,)
@@ -95,7 +96,7 @@ class DictionaryAdapter(DictionaryPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, project_id, term, definition, created_at
+                    """SELECT id, project_id, term, definition, created_at, edited_at
                        FROM dictionary
                        WHERE project_id = %s AND term = %s""",
                     (project_id, term)
@@ -117,17 +118,19 @@ class DictionaryAdapter(DictionaryPort):
                 now = datetime.now()
                 await cursor.execute(
                     """INSERT INTO dictionary 
-                       (project_id, term, definition, created_at)
-                       VALUES (%s, %s, %s, %s)""",
+                       (project_id, term, definition, created_at, edited_at)
+                       VALUES (%s, %s, %s, %s, %s)""",
                     (
                         entry.project_id,
                         entry.term,
                         entry.definition,
                         now,
+                        now,
                     )
                 )
                 entry.id = cursor.lastrowid
                 entry.created_at = now
+                entry.edited_at = now
                 logger.info(f"创建词典条目成功: id={entry.id}, term={entry.term}")
                 return entry
 
@@ -140,19 +143,21 @@ class DictionaryAdapter(DictionaryPort):
                 if await self.check_term_exists(entry.project_id, entry.term, exclude_id=entry.id):
                     raise ValueError(f"术语在项目中已存在: {entry.term}")
 
+                now = datetime.now()
                 await cursor.execute(
                     """UPDATE dictionary 
-                       SET term = %s, definition = %s
+                       SET term = %s, definition = %s, edited_at = %s
                        WHERE id = %s""",
                     (
                         entry.term,
                         entry.definition,
+                        now,
                         entry.id,
                     )
                 )
                 if cursor.rowcount == 0:
                     raise ValueError(f"词典条目不存在: id={entry.id}")
-                
+                entry.edited_at = now
                 logger.info(f"更新词典条目成功: id={entry.id}")
                 return entry
 

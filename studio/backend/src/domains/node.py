@@ -72,9 +72,11 @@ class ProjectNode:
         sort: 同级排序
         status: 节点状态
         document_id: 功能节点关联的文档 ID（仅 node_type=function 时有值）
-        creator: 创建者用户 ID
+        creator_id: 创建者用户 ID（UUID 字符串）
+        creator_name: 创建者用户显示名
         created_at: 创建时间
-        editor: 最近编辑者用户 ID
+        editor_id: 最近编辑者用户 ID（UUID 字符串）
+        editor_name: 最近编辑者用户显示名
         edited_at: 最近编辑时间
         children: 子节点列表（用于树结构）
     """
@@ -88,9 +90,11 @@ class ProjectNode:
     sort: int = 0
     status: int = 1
     document_id: Optional[int] = None  # 功能节点关联的文档 ID
-    creator: int = 0
+    creator_id: str = ""
+    creator_name: str = ""
     created_at: Optional[datetime] = None
-    editor: int = 0
+    editor_id: str = ""
+    editor_name: str = ""
     edited_at: Optional[datetime] = None
     children: List["ProjectNode"] = field(default_factory=list)
 
@@ -100,8 +104,11 @@ class ProjectNode:
             self.created_at = datetime.now()
         if self.edited_at is None:
             self.edited_at = self.created_at
-        if self.editor == 0:
-            self.editor = self.creator
+        # 如果未显式传入编辑者信息，则默认与创建者相同
+        if not self.editor_id:
+            self.editor_id = self.creator_id
+        if not self.editor_name:
+            self.editor_name = self.creator_name
         # 确保 node_type 是 NodeType 枚举
         if isinstance(self.node_type, str):
             self.node_type = NodeType(self.node_type)
@@ -169,7 +176,8 @@ class ProjectNode:
         name: Optional[str] = None,
         description: Optional[str] = None,
         sort: Optional[int] = None,
-        editor: Optional[int] = None,
+        editor_id: Optional[str] = None,
+        editor_name: Optional[str] = None,
     ) -> "ProjectNode":
         """
         更新节点信息。
@@ -178,7 +186,8 @@ class ProjectNode:
             name: 新的节点名称
             description: 新的节点描述
             sort: 新的排序值
-            editor: 编辑者用户 ID
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             ProjectNode: 更新后的节点实例
@@ -189,8 +198,10 @@ class ProjectNode:
             self.description = description
         if sort is not None:
             self.sort = sort
-        if editor is not None:
-            self.editor = editor
+        if editor_id is not None:
+            self.editor_id = editor_id
+        if editor_name is not None:
+            self.editor_name = editor_name
         self.edited_at = datetime.now()
         return self
 
@@ -224,9 +235,11 @@ class ProjectNode:
             "sort": self.sort,
             "status": self.status,
             "document_id": self.document_id,
-            "creator": self.creator,
+            "creator_id": self.creator_id,
+            "creator_name": self.creator_name,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "editor": self.editor,
+            "editor_id": self.editor_id,
+            "editor_name": self.editor_name,
             "edited_at": self.edited_at.isoformat() if self.edited_at else None,
         }
         if include_children:
