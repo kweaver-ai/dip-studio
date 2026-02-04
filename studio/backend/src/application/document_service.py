@@ -123,7 +123,8 @@ class DocumentService:
         self,
         document_id: int,
         patch_operations: List[dict],
-        editor: int = 0,
+        editor_id: str = "",
+        editor_name: str = "",
     ) -> FunctionDocument:
         """
         使用 JSON Patch (RFC 6902) 更新文档块。
@@ -133,7 +134,8 @@ class DocumentService:
         参数:
             document_id: 文档 ID
             patch_operations: RFC 6902 的 patch 操作列表，如 [{"op": "replace", "path": "/blocks/0/content", "value": {...}}]
-            editor: 编辑者用户 ID
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             FunctionDocument: 更新后的文档（包含所有块）
@@ -158,7 +160,7 @@ class DocumentService:
             for item in blocks_list
         ]
         saved = await self._document_block_port.replace_blocks(document_id, new_blocks)
-        document.update_editor(editor)
+        document.update_editor(editor_id=editor_id, editor_name=editor_name)
         await self._document_port.update_document(document)
         document.blocks = saved
         return document
@@ -178,7 +180,8 @@ class DocumentService:
     async def init_document(
         self,
         function_node_id: int,
-        creator: int = 0,
+        creator_id: str = "",
+        creator_name: str = "",
     ) -> tuple[int, FunctionDocument]:
         """
         初始化文档（适配 TipTap + fast-json-patch 前端方案）。
@@ -186,7 +189,8 @@ class DocumentService:
 
         参数:
             function_node_id: 功能节点 ID
-            creator: 创建者用户 ID
+            creator_id: 创建者用户 ID（UUID 字符串）
+            creator_name: 创建者用户显示名
 
         返回:
             tuple[int, FunctionDocument]: (document_id, 文档实体，含 blocks)
@@ -212,7 +216,8 @@ class DocumentService:
         doc = FunctionDocument(
             id=0,
             function_node_id=function_node_id,
-            creator=creator,
+            creator_id=creator_id,
+            creator_name=creator_name,
         )
         doc = await self._document_port.create_document(doc)
         await self._node_port.update_node_document_id(function_node_id, doc.id)

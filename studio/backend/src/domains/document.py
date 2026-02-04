@@ -127,17 +127,21 @@ class FunctionDocument:
     属性:
         id: 文档主键 ID
         function_node_id: 关联的功能节点 ID
-        creator: 创建者用户 ID
+        creator_id: 创建者用户 ID（UUID 字符串）
+        creator_name: 创建者用户显示名
         created_at: 创建时间
-        editor: 最近编辑者用户 ID
+        editor_id: 最近编辑者用户 ID（UUID 字符串）
+        editor_name: 最近编辑者用户显示名
         edited_at: 最近编辑时间
         blocks: 文档块列表（查询时填充）
     """
     id: int
     function_node_id: int
-    creator: int = 0
+    creator_id: str = ""
+    creator_name: str = ""
     created_at: Optional[datetime] = None
-    editor: int = 0
+    editor_id: str = ""
+    editor_name: str = ""
     edited_at: Optional[datetime] = None
     blocks: List[DocumentBlock] = field(default_factory=list)
 
@@ -147,8 +151,11 @@ class FunctionDocument:
             self.created_at = datetime.now()
         if self.edited_at is None:
             self.edited_at = self.created_at
-        if self.editor == 0:
-            self.editor = self.creator
+        # 如果未显式传入编辑者信息，则默认与创建者相同
+        if not self.editor_id:
+            self.editor_id = self.creator_id
+        if not self.editor_name:
+            self.editor_name = self.creator_name
 
     def validate(self) -> None:
         """
@@ -160,17 +167,19 @@ class FunctionDocument:
         if not self.function_node_id:
             raise ValueError("功能节点 ID 不能为空")
 
-    def update_editor(self, editor: int) -> "FunctionDocument":
+    def update_editor(self, editor_id: str, editor_name: str) -> "FunctionDocument":
         """
         更新编辑者信息。
 
         参数:
-            editor: 编辑者用户 ID
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             FunctionDocument: 更新后的文档实例
         """
-        self.editor = editor
+        self.editor_id = editor_id
+        self.editor_name = editor_name
         self.edited_at = datetime.now()
         return self
 
@@ -193,9 +202,11 @@ class FunctionDocument:
         return {
             "id": self.id,
             "function_node_id": self.function_node_id,
-            "creator": self.creator,
+            "creator_id": self.creator_id,
+            "creator_name": self.creator_name,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "editor": self.editor,
+            "editor_id": self.editor_id,
+            "editor_name": self.editor_name,
             "edited_at": self.edited_at.isoformat() if self.edited_at else None,
             "blocks": [block.to_dict() for block in self.blocks],
         }
