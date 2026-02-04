@@ -9,6 +9,7 @@ from src.infrastructure.context.token_context import (
     get_auth_token,
     get_user_info,
     get_user_id,
+    get_user_name,
 )
 
 __all__ = [
@@ -17,4 +18,5 @@ __all__ = [
     "get_auth_token",
     "get_user_info",
     "get_user_id",
+    "get_user_name",
 ]

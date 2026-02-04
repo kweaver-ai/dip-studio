@@ -31,7 +31,11 @@ class DictionaryEntryResponse(BaseModel):
     project_id: int = Field(..., description="项目 ID")
     term: str = Field(..., description="术语名称")
     definition: str = Field(..., description="术语定义")
+    creator_id: Optional[str] = Field(None, description="创建者用户 ID（UUID）")
+    creator_name: Optional[str] = Field(None, description="创建者用户显示名")
     created_at: Optional[datetime] = Field(None, description="创建时间")
-     edited_at: Optional[datetime] = Field(None, description="最近编辑时间")
+    editor_id: Optional[str] = Field(None, description="最近编辑者用户 ID（UUID）")
+    editor_name: Optional[str] = Field(None, description="最近编辑者用户显示名")
+    edited_at: Optional[datetime] = Field(None, description="最近编辑时间")
 
     model_config = ConfigDict(from_attributes=True)

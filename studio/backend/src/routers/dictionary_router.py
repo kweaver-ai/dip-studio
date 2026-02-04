@@ -11,6 +11,7 @@ from fastapi.responses import Response
 
 from src.application.dictionary_service import DictionaryService
 from src.infrastructure.exceptions import NotFoundError, ValidationError, ConflictError, InternalError
+from src.infrastructure.context import get_user_id, get_user_name
 from src.routers.schemas.dictionary import (
     CreateDictionaryEntryRequest,
     UpdateDictionaryEntryRequest,
@@ -40,7 +41,11 @@ def create_dictionary_router(dictionary_service: DictionaryService) -> APIRouter
             project_id=entry.project_id,
             term=entry.term,
             definition=entry.definition,
+            creator_id=entry.creator_id,
+            creator_name=entry.creator_name,
             created_at=entry.created_at,
+            editor_id=entry.editor_id,
+            editor_name=entry.editor_name,
             edited_at=entry.edited_at,
         )
 
@@ -63,6 +68,8 @@ def create_dictionary_router(dictionary_service: DictionaryService) -> APIRouter
                 project_id=request.project_id,
                 term=request.term,
                 definition=request.definition,
+                creator_id=get_user_id(),
+                creator_name=get_user_name(),
             )
             return _entry_to_response(entry)
         except ValueError as e:
@@ -121,6 +128,8 @@ def create_dictionary_router(dictionary_service: DictionaryService) -> APIRouter
                 entry_id=entry_id,
                 term=request.term,
                 definition=request.definition,
+                editor_id=get_user_id(),
+                editor_name=get_user_name(),
             )
             return _entry_to_response(entry)
         except ValueError as e:
