@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM acr.aishu.cn/dip/py.build:3.10.18-20251020
 
 WORKDIR /app
 

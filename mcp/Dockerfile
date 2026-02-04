@@ -2,7 +2,7 @@
 # Multi-stage build for optimized image size
 
 # Stage 1: Build stage
-FROM python:3.10-slim as builder
+FROM acr.aishu.cn/dip/py.build:3.10.18-20251020 as builder
 
 # Set working directory
 WORKDIR /build
@@ -18,7 +18,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Stage 2: Runtime stage
-FROM python:3.10-slim
+FROM acr.aishu.cn/dip/py.build:3.10.18-20251020
 
 # Set working directory
 WORKDIR /app
