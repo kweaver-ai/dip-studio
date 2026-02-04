@@ -29,9 +29,11 @@ class ProjectResponse(BaseModel):
     id: int = Field(..., description="项目 ID")
     name: str = Field(..., description="项目名称")
     description: Optional[str] = Field(None, description="项目描述")
-    creator: int = Field(..., description="创建者用户 ID")
+    creator_id: str = Field("", description="创建者用户 ID（UUID）")
+    creator_name: str = Field("", description="创建者用户显示名")
     created_at: datetime = Field(..., description="创建时间")
-    editor: int = Field(..., description="最近编辑者用户 ID")
+    editor_id: str = Field("", description="最近编辑者用户 ID（UUID）")
+    editor_name: str = Field("", description="最近编辑者用户显示名")
     edited_at: datetime = Field(..., description="最近编辑时间")
 
     model_config = ConfigDict(from_attributes=True)

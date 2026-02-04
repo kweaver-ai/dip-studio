@@ -37,13 +37,13 @@ class NodeAdapter(NodePort):
         将数据库行转换为节点领域模型。
 
         参数:
-            row: 数据库查询结果行 (含 document_id 时为 14 列，无 mode)
+            row: 数据库查询结果行 (16 列: id, project_id, parent_id, node_type, name, description,
+                 path, sort, status, document_id, creator_id, creator_name, created_at,
+                 editor_id, editor_name, edited_at)
 
         返回:
             ProjectNode: 节点领域模型
         """
-        # 兼容无 document_id 的旧表（行长为 13）
-        document_id = row[13] if len(row) > 13 else None
         return ProjectNode(
             id=row[0],
             project_id=row[1],
@@ -54,11 +54,13 @@ class NodeAdapter(NodePort):
             path=row[6],
             sort=row[7],
             status=row[8] if row[8] is not None else 1,
-            creator=row[9],
-            created_at=row[10],
-            editor=row[11],
-            edited_at=row[12],
-            document_id=document_id,
+            document_id=row[9],
+            creator_id=row[10] or "",
+            creator_name=row[11] or "",
+            created_at=row[12],
+            editor_id=row[13] or "",
+            editor_name=row[14] or "",
+            edited_at=row[15],
         )
 
     async def get_node_by_id(self, node_id: int) -> ProjectNode:
@@ -75,8 +77,8 @@ class NodeAdapter(NodePort):
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     """SELECT id, project_id, parent_id, node_type, name, description,
-                              path, sort, status, creator, created_at, editor, edited_at,
-                              document_id
+                              path, sort, status, document_id, creator_id, creator_name, created_at,
+                              editor_id, editor_name, edited_at
                        FROM project_node
                        WHERE id = %s""",
                     (node_id,)
@@ -93,8 +95,8 @@ class NodeAdapter(NodePort):
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     """SELECT id, project_id, parent_id, node_type, name, description,
-                              path, sort, status, creator, created_at, editor, edited_at,
-                              document_id
+                              path, sort, status, document_id, creator_id, creator_name, created_at,
+                              editor_id, editor_name, edited_at
                        FROM project_node
                        WHERE project_id = %s
                        ORDER BY path, sort""",
@@ -110,8 +112,8 @@ class NodeAdapter(NodePort):
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     """SELECT id, project_id, parent_id, node_type, name, description,
-                              path, sort, status, creator, created_at, editor, edited_at,
-                              document_id
+                              path, sort, status, document_id, creator_id, creator_name, created_at,
+                              editor_id, editor_name, edited_at
                        FROM project_node
                        WHERE project_id = %s AND parent_id IS NULL AND node_type = %s""",
                     (project_id, NodeType.APPLICATION.value)
@@ -128,8 +130,8 @@ class NodeAdapter(NodePort):
             async with conn.cursor() as cursor:
                 await cursor.execute(
                     """SELECT id, project_id, parent_id, node_type, name, description,
-                              path, sort, status, creator, created_at, editor, edited_at,
-                              document_id
+                              path, sort, status, document_id, creator_id, creator_name, created_at,
+                              editor_id, editor_name, edited_at
                        FROM project_node
                        WHERE parent_id = %s
                        ORDER BY sort""",
@@ -151,8 +153,8 @@ class NodeAdapter(NodePort):
                 # 使用路径前缀查询所有后代
                 await cursor.execute(
                     """SELECT id, project_id, parent_id, node_type, name, description,
-                              path, sort, status, creator, created_at, editor, edited_at,
-                              document_id
+                              path, sort, status, document_id, creator_id, creator_name, created_at,
+                              editor_id, editor_name, edited_at
                        FROM project_node
                        WHERE path LIKE %s AND id != %s
                        ORDER BY path, sort""",
@@ -182,8 +184,9 @@ class NodeAdapter(NodePort):
                 await cursor.execute(
                     """INSERT INTO project_node 
                        (project_id, parent_id, node_type, name, description, path, sort, 
-                        status, creator, created_at, editor, edited_at, document_id)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        status, document_id, creator_id, creator_name, created_at,
+                        editor_id, editor_name, edited_at)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
                         node.project_id,
                         node.parent_id,
@@ -193,11 +196,13 @@ class NodeAdapter(NodePort):
                         node.path or "",  # 临时路径，创建后更新
                         node.sort,
                         node.status,
-                        node.creator,
-                        now,
-                        node.editor or node.creator,
-                        now,
                         node.document_id,
+                        node.creator_id,
+                        node.creator_name,
+                        now,
+                        node.editor_id or node.creator_id,
+                        node.editor_name or node.creator_name,
+                        now,
                     )
                 )
                 node.id = cursor.lastrowid
@@ -239,13 +244,14 @@ class NodeAdapter(NodePort):
                 await cursor.execute(
                     """UPDATE project_node 
                        SET name = %s, description = %s, sort = %s,
-                           editor = %s, edited_at = %s
+                           editor_id = %s, editor_name = %s, edited_at = %s
                        WHERE id = %s""",
                     (
                         node.name,
                         node.description,
                         node.sort,
-                        node.editor,
+                        node.editor_id,
+                        node.editor_name,
                         now,
                         node.id,
                     )
@@ -292,6 +298,8 @@ class NodeAdapter(NodePort):
         node_id: int,
         new_parent_id: Optional[int],
         new_sort: int,
+        editor_id: str = "",
+        editor_name: str = "",
     ) -> ProjectNode:
         """移动节点到新的父节点下；先对同级 sort >= new_sort 的节点 +1 腾位，再写入新 sort。"""
         pool = await self._db_pool.get_pool()
@@ -325,9 +333,9 @@ class NodeAdapter(NodePort):
 
                 await cursor.execute(
                     """UPDATE project_node 
-                       SET parent_id = %s, path = %s, sort = %s, edited_at = %s
+                       SET parent_id = %s, path = %s, sort = %s, editor_id = %s, editor_name = %s, edited_at = %s
                        WHERE id = %s""",
-                    (new_parent_id, new_path, new_sort, now, node_id),
+                    (new_parent_id, new_path, new_sort, editor_id, editor_name, now, node_id),
                 )
 
                 await self.update_descendants_path(node_id, old_path, new_path)
@@ -335,6 +343,8 @@ class NodeAdapter(NodePort):
                 node.parent_id = new_parent_id
                 node.path = new_path
                 node.sort = new_sort
+                node.editor_id = editor_id
+                node.editor_name = editor_name
                 node.edited_at = now
 
                 logger.info(f"移动节点成功: id={node_id}, new_parent_id={new_parent_id}")

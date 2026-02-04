@@ -264,7 +264,8 @@ class NodeService:
         node_id: int,
         name: Optional[str] = None,
         description: Optional[str] = None,
-        editor: int = 0,
+        editor_id: str = "",
+        editor_name: str = "",
     ) -> ProjectNode:
         """
         更新节点信息。
@@ -273,7 +274,8 @@ class NodeService:
             node_id: 节点 ID
             name: 新的节点名称
             description: 新的节点描述
-            editor: 编辑者用户 ID
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             ProjectNode: 更新后的节点
@@ -285,7 +287,7 @@ class NodeService:
         node = await self._node_port.get_node_by_id(node_id)
         
         # 更新字段
-        node.update(name=name, description=description, editor=editor)
+        node.update(name=name, description=description, editor_id=editor_id, editor_name=editor_name)
         node.validate()
         
         return await self._node_port.update_node(node)
@@ -295,7 +297,8 @@ class NodeService:
         node_id: int,
         new_parent_id: Optional[int],
         predecessor_node_id: Optional[int] = None,
-        editor: int = 0,
+        editor_id: str = "",
+        editor_name: str = "",
     ) -> ProjectNode:
         """
         移动节点到新的父节点下。
@@ -305,7 +308,8 @@ class NodeService:
             new_parent_id: 新父节点 ID
             predecessor_node_id: 前置节点 ID（新父节点下的直接子节点，移动后位于该节点之后）；
                 None 表示放到第一个
-            editor: 编辑者用户 ID
+            editor_id: 编辑者用户 ID（UUID 字符串）
+            editor_name: 编辑者用户显示名
 
         返回:
             ProjectNode: 移动后的节点
@@ -340,7 +344,9 @@ class NodeService:
                 raise ValueError("前置节点须属于同一项目")
             new_sort = predecessor.sort + 1
 
-        return await self._node_port.move_node(node_id, new_parent_id, new_sort)
+        return await self._node_port.move_node(
+            node_id, new_parent_id, new_sort, editor_id=editor_id, editor_name=editor_name
+        )
 
     async def delete_node(self, node_id: int) -> bool:
         """

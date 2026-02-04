@@ -38,7 +38,7 @@ class DocumentAdapter(DocumentPort):
 
         参数:
             row: 数据库查询结果行
-                (id, function_node_id, creator, created_at, editor, edited_at)
+                (id, function_node_id, creator_id, creator_name, created_at, editor_id, editor_name, edited_at)
 
         返回:
             FunctionDocument: 文档领域模型
@@ -46,10 +46,12 @@ class DocumentAdapter(DocumentPort):
         return FunctionDocument(
             id=row[0],
             function_node_id=row[1],
-            creator=row[2],
-            created_at=row[3],
-            editor=row[4],
-            edited_at=row[5],
+            creator_id=row[2] or "",
+            creator_name=row[3] or "",
+            created_at=row[4],
+            editor_id=row[5] or "",
+            editor_name=row[6] or "",
+            edited_at=row[7],
         )
 
     async def get_document_by_id(self, document_id: int) -> FunctionDocument:
@@ -65,7 +67,7 @@ class DocumentAdapter(DocumentPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, function_node_id, creator, created_at, editor, edited_at
+                    """SELECT id, function_node_id, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM function_document
                        WHERE id = %s""",
                     (document_id,)
@@ -81,7 +83,7 @@ class DocumentAdapter(DocumentPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, function_node_id, creator, created_at, editor, edited_at
+                    """SELECT id, function_node_id, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM function_document
                        WHERE function_node_id = %s""",
                     (function_node_id,)
@@ -99,13 +101,15 @@ class DocumentAdapter(DocumentPort):
                 now = datetime.now()
                 await cursor.execute(
                     """INSERT INTO function_document 
-                       (function_node_id, creator, created_at, editor, edited_at)
-                       VALUES (%s, %s, %s, %s, %s)""",
+                       (function_node_id, creator_id, creator_name, created_at, editor_id, editor_name, edited_at)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s)""",
                     (
                         document.function_node_id,
-                        document.creator,
+                        document.creator_id,
+                        document.creator_name,
                         now,
-                        document.editor or document.creator,
+                        document.editor_id or document.creator_id,
+                        document.editor_name or document.creator_name,
                         now,
                     )
                 )
@@ -123,10 +127,11 @@ class DocumentAdapter(DocumentPort):
                 now = datetime.now()
                 await cursor.execute(
                     """UPDATE function_document 
-                       SET editor = %s, edited_at = %s
+                       SET editor_id = %s, editor_name = %s, edited_at = %s
                        WHERE id = %s""",
                     (
-                        document.editor,
+                        document.editor_id,
+                        document.editor_name,
                         now,
                         document.id,
                     )

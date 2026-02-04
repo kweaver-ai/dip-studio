@@ -38,7 +38,7 @@ class DictionaryAdapter(DictionaryPort):
 
         参数:
             row: 数据库查询结果行
-                (id, project_id, term, definition, created_at, edited_at)
+                (id, project_id, term, definition, creator_id, creator_name, created_at, editor_id, editor_name, edited_at)
 
         返回:
             DictionaryEntry: 词典条目领域模型
@@ -48,8 +48,12 @@ class DictionaryAdapter(DictionaryPort):
             project_id=row[1],
             term=row[2],
             definition=row[3],
-            created_at=row[4],
-            edited_at=row[5],
+            creator_id=row[4],
+            creator_name=row[5],
+            created_at=row[6],
+            editor_id=row[7],
+            editor_name=row[8],
+            edited_at=row[9],
         )
 
     async def get_entries_by_project_id(self, project_id: int) -> List[DictionaryEntry]:
@@ -58,7 +62,7 @@ class DictionaryAdapter(DictionaryPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, project_id, term, definition, created_at, edited_at
+                    """SELECT id, project_id, term, definition, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM dictionary
                        WHERE project_id = %s
                        ORDER BY term""",
@@ -80,7 +84,7 @@ class DictionaryAdapter(DictionaryPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, project_id, term, definition, created_at, edited_at
+                    """SELECT id, project_id, term, definition, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM dictionary
                        WHERE id = %s""",
                     (entry_id,)
@@ -96,7 +100,7 @@ class DictionaryAdapter(DictionaryPort):
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
                 await cursor.execute(
-                    """SELECT id, project_id, term, definition, created_at, edited_at
+                    """SELECT id, project_id, term, definition, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
                        FROM dictionary
                        WHERE project_id = %s AND term = %s""",
                     (project_id, term)
@@ -118,13 +122,17 @@ class DictionaryAdapter(DictionaryPort):
                 now = datetime.now()
                 await cursor.execute(
                     """INSERT INTO dictionary 
-                       (project_id, term, definition, created_at, edited_at)
-                       VALUES (%s, %s, %s, %s, %s)""",
+                       (project_id, term, definition, creator_id, creator_name, created_at, editor_id, editor_name, edited_at)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
                         entry.project_id,
                         entry.term,
                         entry.definition,
+                        entry.creator_id,
+                        entry.creator_name,
                         now,
+                        entry.editor_id or entry.creator_id,
+                        entry.editor_name or entry.creator_name,
                         now,
                     )
                 )
@@ -146,11 +154,13 @@ class DictionaryAdapter(DictionaryPort):
                 now = datetime.now()
                 await cursor.execute(
                     """UPDATE dictionary 
-                       SET term = %s, definition = %s, edited_at = %s
+                       SET term = %s, definition = %s, editor_id = %s, editor_name = %s, edited_at = %s
                        WHERE id = %s""",
                     (
                         entry.term,
                         entry.definition,
+                        entry.editor_id,
+                        entry.editor_name,
                         now,
                         entry.id,
                     )
