@@ -126,6 +126,9 @@ class Container:
                 project_port=self.project_adapter,
                 node_port=self.node_adapter,
                 dictionary_port=self.dictionary_adapter,
+                document_port=self.document_adapter,
+                document_block_port=self.document_block_adapter,
+                document_content_port=self.document_content_adapter,
             )
         return self._project_service
     
