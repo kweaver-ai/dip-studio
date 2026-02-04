@@ -60,7 +60,7 @@ ENV PYTHONPATH=/app
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/mcp')" || exit 1
+    CMD /usr/local/bin/python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/mcp')" || exit 1
 
 # Run the MCP server
 # 注意：基础镜像中提供的是 python3 可执行文件，所以这里显式使用 python3
