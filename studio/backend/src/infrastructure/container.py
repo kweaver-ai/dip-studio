@@ -16,6 +16,8 @@ from src.adapters.dictionary_adapter import DictionaryAdapter
 from src.adapters.document_adapter import DocumentAdapter
 from src.adapters.document_block_adapter import DocumentBlockAdapter
 from src.adapters.document_content_adapter import DocumentContentAdapter
+from src.adapters.hydra_adapter import HydraAdapter
+from src.adapters.user_management_adapter import UserManagementAdapter
 from src.infrastructure.config.settings import Settings, get_settings
 from src.infrastructure.database.mariadb import MariaDBPool
 
@@ -48,6 +50,8 @@ class Container:
         self._document_adapter: DocumentAdapter = None
         self._document_block_adapter: DocumentBlockAdapter = None
         self._document_content_adapter: DocumentContentAdapter = None
+        self._hydra_adapter: HydraAdapter = None
+        self._user_management_adapter: UserManagementAdapter = None
         
         # 服务
         self._project_service: ProjectService = None
@@ -115,6 +119,20 @@ class Container:
         if self._document_content_adapter is None:
             self._document_content_adapter = DocumentContentAdapter(self.mariadb_pool)
         return self._document_content_adapter
+
+    @property
+    def hydra_adapter(self) -> HydraAdapter:
+        """获取 Hydra 适配器实例（用于 token 内省）。"""
+        if self._hydra_adapter is None:
+            self._hydra_adapter = HydraAdapter(self._settings)
+        return self._hydra_adapter
+
+    @property
+    def user_management_adapter(self) -> UserManagementAdapter:
+        """获取用户管理适配器实例（用于根据用户 ID 获取用户信息）。"""
+        if self._user_management_adapter is None:
+            self._user_management_adapter = UserManagementAdapter(self._settings)
+        return self._user_management_adapter
     
     # ============ 服务 ============
     
