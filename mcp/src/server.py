@@ -32,6 +32,8 @@ logger = logging.getLogger(__name__)
 openapi_loader: OpenAPILoader | None = None
 mcp: FastMCP | None = None
 studio_base_url: str = ""
+# Server transport mode: "http" (SSE) or "streamable-http"
+server_transport: str | None = None
 
 # 标准开发任务说明（get_context 返回中附带，供 Coding Agent 使用）
 DEVELOPMENT_TASK = """请你作为本项目的专业开发助手，基于当前功能节点以及其上下文：
@@ -101,7 +103,7 @@ def load_config() -> dict[str, Any]:
 
 def setup_server() -> None:
     """Initialize server components with configuration."""
-    global openapi_loader, mcp, studio_base_url
+    global openapi_loader, mcp, studio_base_url, server_transport
     
     try:
         config = load_config()
@@ -110,6 +112,8 @@ def setup_server() -> None:
         server_config = config.get("server", {})
         host = server_config.get("host", "0.0.0.0")
         port = server_config.get("port", 8000)
+        # Transport: "http" (legacy SSE) or "streamable-http" (recommended)
+        server_transport = server_config.get("transport", "streamable-http")
         
         # Studio internal API base URL (for get_context); env STUDIO_BASE_URL overrides config
         studio_config = config.get("studio", {})
@@ -561,10 +565,11 @@ def main() -> None:
         logger.error("Alternatively, install from: pip install git+https://github.com/modelcontextprotocol/python-sdk.git")
         return
     
-    # Run the server with streamable-http transport
-    logger.info("Starting DIP Studio MCP Server (HTTP transport)...")
+    # Run the server with configured transport
+    transport = server_transport or "streamable-http"
+    logger.info(f"Starting DIP Studio MCP Server (transport={transport})...")
     try:
-        mcp.run(transport="streamable-http")
+        mcp.run(transport=transport)
     except Exception as e:
         logger.error(f"Error starting server: {e}")
         raise

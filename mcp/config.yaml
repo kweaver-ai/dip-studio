@@ -1,7 +1,9 @@
 server:
   host: "0.0.0.0"
   port: 8001
-  transport: "http"
+  # 使用 MCP 新的 Streamable HTTP 传输（推荐，适配 Cursor 等客户端）
+  # 如需兼容旧版 HTTP+SSE，可改为 "http"
+  transport: "streamable-http"
   # Authentication is disabled - clients can connect directly without tokens
 
 # Studio 内部接口 base URL（get_context 工具调用，K8s 内示例：http://dip-studio.anyshare:8000）
