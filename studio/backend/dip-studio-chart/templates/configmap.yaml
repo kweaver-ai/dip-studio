@@ -25,11 +25,11 @@ data:
   DIP_STUDIO_DB_PASSWORD: {{ .Values.depServices.rds.password | quote }}
   DIP_STUDIO_DB_POOL_MIN_SIZE: "{{ .Values.depServices.rds.poolMinSize | default 1 }}"
   DIP_STUDIO_DB_POOL_MAX_SIZE: "{{ .Values.depServices.rds.poolMaxSize | default 10 }}"
-  # Hydra 配置（token 内省，与 dip-hub-chart 一致）
-  DIP_STUDIO_HYDRA_HOST: "http://{{ .Values.depServices.hydra.administrativeHost }}:{{ .Values.depServices.hydra.administrativePort }}"
+  # Hydra 配置（token 内省，与 dip-hub-chart 一致，使用 index 避免 key 含连字符报错）
+  DIP_STUDIO_HYDRA_HOST: "http://{{ index .Values.depServices "hydra" "administrativeHost" }}:{{ index .Values.depServices "hydra" "administrativePort" }}"
   DIP_STUDIO_HYDRA_TIMEOUT: "30"
-  # User Management 服务配置（与 dip-hub-chart 一致）
-  DIP_STUDIO_USER_MANAGEMENT_URL: "http://{{ .Values.depServices.user-management.privateHost }}:{{ .Values.depServices.user-management.privatePort }}"
+  # User Management 服务配置（与 dip-hub-chart 一致，使用 index 因 key 含连字符）
+  DIP_STUDIO_USER_MANAGEMENT_URL: "http://{{ index .Values.depServices "user-management" "privateHost" }}:{{ index .Values.depServices "user-management" "privatePort" }}"
   DIP_STUDIO_USER_MANAGEMENT_TIMEOUT: "60"
   # Mock 模式配置
   DIP_STUDIO_USE_MOCK_SERVICES: "false"
