@@ -71,9 +71,11 @@ def create_node_router(node_service: NodeService) -> APIRouter:
             path=node.path,
             status=node.status,
             document_id=node.document_id,
-            creator=node.creator,
+            creator_id=node.creator_id,
+            creator_name=node.creator_name,
             created_at=node.created_at,
-            editor=node.editor,
+            editor_id=node.editor_id,
+            editor_name=node.editor_name,
             edited_at=node.edited_at,
             children=[_node_to_tree_response(child) for child in node.children],
         )
@@ -182,6 +184,42 @@ def create_node_router(node_service: NodeService) -> APIRouter:
             logger.exception(f"创建功能节点失败: {e}")
             raise InternalError(description=f"创建功能节点失败: {str(e)}")
 
+    # 注意：PUT /move 必须定义在 PUT /{node_id} 之前，否则 /nodes/move 会被匹配为 node_id="move" 导致整型解析失败
+    @router.put(
+        "/move",
+        summary="移动节点",
+        description="移动节点到新的父节点下",
+        response_model=NodeResponse,
+        responses={
+            200: {"description": "移动成功"},
+            400: {"description": "请求参数错误", "model": ErrorResponse},
+            404: {"description": "节点不存在", "model": ErrorResponse},
+        }
+    )
+    async def move_node(request: MoveNodeRequest) -> NodeResponse:
+        """移动节点。"""
+        try:
+            node = await node_service.move_node(
+                node_id=request.node_id,
+                new_parent_id=request.new_parent_id,
+                predecessor_node_id=request.predecessor_node_id,
+                editor_id=get_user_id(),
+                editor_name=get_user_name(),
+            )
+            return _node_to_response(node)
+        except ValueError as e:
+            error_msg = str(e)
+            if "不存在" in error_msg:
+                raise NotFoundError(description=error_msg)
+            raise ValidationError(
+                code="INVALID_REQUEST",
+                description=error_msg,
+                solution="请检查请求参数",
+            )
+        except Exception as e:
+            logger.exception(f"移动节点失败: {e}")
+            raise InternalError(description=f"移动节点失败: {str(e)}")
+
     @router.put(
         "/{node_id}",
         summary="更新节点",
@@ -219,41 +257,6 @@ def create_node_router(node_service: NodeService) -> APIRouter:
         except Exception as e:
             logger.exception(f"更新节点失败: {e}")
             raise InternalError(description=f"更新节点失败: {str(e)}")
-
-    @router.put(
-        "/move",
-        summary="移动节点",
-        description="移动节点到新的父节点下",
-        response_model=NodeResponse,
-        responses={
-            200: {"description": "移动成功"},
-            400: {"description": "请求参数错误", "model": ErrorResponse},
-            404: {"description": "节点不存在", "model": ErrorResponse},
-        }
-    )
-    async def move_node(request: MoveNodeRequest) -> NodeResponse:
-        """移动节点。"""
-        try:
-            node = await node_service.move_node(
-                node_id=request.node_id,
-                new_parent_id=request.new_parent_id,
-                predecessor_node_id=request.predecessor_node_id,
-                editor_id=get_user_id(),
-                editor_name=get_user_name(),
-            )
-            return _node_to_response(node)
-        except ValueError as e:
-            error_msg = str(e)
-            if "不存在" in error_msg:
-                raise NotFoundError(description=error_msg)
-            raise ValidationError(
-                code="INVALID_REQUEST",
-                description=error_msg,
-                solution="请检查请求参数",
-            )
-        except Exception as e:
-            logger.exception(f"移动节点失败: {e}")
-            raise InternalError(description=f"移动节点失败: {str(e)}")
 
     @router.delete(
         "/{node_id}",
