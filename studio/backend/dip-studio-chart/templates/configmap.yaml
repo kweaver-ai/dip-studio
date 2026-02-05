@@ -4,15 +4,34 @@ metadata:
   name: {{ .Values.name }}-cm
   namespace: {{ .Values.namespace }}
 data:
+  # 应用配置（对应 settings.py）
   DIP_STUDIO_APP_NAME: "DIP Studio"
-  DIP_STUDIO_APP_VERSION: "0.1.0"
+  DIP_STUDIO_APP_VERSION: {{ .Values.service.version | default "0.1.0" | quote }}
+  DIP_STUDIO_DEBUG: "false"
+  # 服务器配置
   DIP_STUDIO_HOST: "0.0.0.0"
   DIP_STUDIO_PORT: "{{ .Values.ports.containerPort | toString }}"
+  DIP_STUDIO_WORKERS: "{{ .Values.service.workers | default 1 }}"
+  # API 配置
   DIP_STUDIO_API_PREFIX: "/api/dip-studio/v1"
-  DIP_STUDIO_DEBUG: "false"
-  DIP_STUDIO_LOG_LEVEL: "INFO"
+  # 日志配置
+  DIP_STUDIO_LOG_LEVEL: {{ .Values.service.logLevel | default "INFO" | quote }}
+  DIP_STUDIO_LOG_FORMAT: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  # MariaDB 配置
   DIP_STUDIO_DB_HOST: {{ .Values.depServices.rds.host | quote }}
   DIP_STUDIO_DB_PORT: "{{ .Values.depServices.rds.port }}"
   DIP_STUDIO_DB_NAME: {{ .Values.depServices.rds.database | quote }}
   DIP_STUDIO_DB_USER: {{ .Values.depServices.rds.user | quote }}
   DIP_STUDIO_DB_PASSWORD: {{ .Values.depServices.rds.password | quote }}
+  DIP_STUDIO_DB_POOL_MIN_SIZE: "{{ .Values.depServices.rds.poolMinSize | default 1 }}"
+  DIP_STUDIO_DB_POOL_MAX_SIZE: "{{ .Values.depServices.rds.poolMaxSize | default 10 }}"
+  # Hydra 配置（token 内省，与 dip-hub-chart 一致）
+  DIP_STUDIO_HYDRA_HOST: "http://{{ .Values.depServices.hydra.administrativeHost }}:{{ .Values.depServices.hydra.administrativePort }}"
+  DIP_STUDIO_HYDRA_TIMEOUT: "30"
+  # User Management 服务配置（与 dip-hub-chart 一致）
+  DIP_STUDIO_USER_MANAGEMENT_URL: "http://{{ .Values.depServices.user-management.privateHost }}:{{ .Values.depServices.user-management.privatePort }}"
+  DIP_STUDIO_USER_MANAGEMENT_TIMEOUT: "60"
+  # Mock 模式配置
+  DIP_STUDIO_USE_MOCK_SERVICES: "false"
+  # 临时文件配置
+  DIP_STUDIO_TEMP_DIR: "/tmp/dip-studio"

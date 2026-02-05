@@ -27,6 +27,9 @@ service:
   name: dip-studio
   type: ClusterIP
   port: 8000
+  version: "0.1.0-develop"
+  workers: 1
+  logLevel: "INFO"
 
 resources:
   requests:
@@ -45,3 +48,17 @@ depServices:
     user: anyshare
     password: eisoo.com123
     database: dip
+    poolMinSize: 1
+    poolMaxSize: 10
+  # Hydra（token 内省），与 dip-hub-chart 一致
+  hydra:
+    publicHost: hydra-public
+    publicPort: 4444
+    administrativeHost: hydra-admin
+    administrativePort: 4445
+  # User Management（根据用户 ID 获取用户信息），与 dip-hub-chart 一致
+  user-management:
+    publicHost: user-management-public
+    publicPort: 30980
+    privateHost: user-management-private
+    privatePort: 30980
