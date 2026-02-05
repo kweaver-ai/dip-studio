@@ -60,6 +60,23 @@ class Settings(BaseSettings):
         default=False, 
         description="是否使用 Mock 外部服务（用于本地开发调试）"
     )
+
+    # Hydra 配置（与 hub 一致，用于 token 内省获取用户 ID）
+    hydra_host: str = Field(
+        default="http://localhost:4445",
+        description="Hydra 管理服务地址（Admin API）"
+    )
+    hydra_timeout: int = Field(default=30, description="Hydra 请求超时时间（秒）")
+
+    # User Management 服务配置（与 hub 一致，用于根据用户 ID 获取用户信息）
+    user_management_url: str = Field(
+        default="http://user-management",
+        description="User Management 服务地址"
+    )
+    user_management_timeout: int = Field(
+        default=60,
+        description="User Management 请求超时时间（秒）"
+    )
     
     # 临时文件配置
     temp_dir: str = Field(default="/tmp/dip-studio", description="临时文件目录")

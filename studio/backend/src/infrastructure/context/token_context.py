@@ -3,38 +3,12 @@ Token上下文管理器
 
 提供统一的token和用户信息获取方式，供适配器层使用。
 通过contextvars实现请求级别的上下文管理。
+与 hub 一致：用户信息由认证中间件通过 Hydra 内省 + 用户管理服务获取并设置。
 """
 import contextvars
-from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Optional
 
-
-@dataclass
-class UserInfo:
-    """
-    用户信息。
-
-    存储从认证系统获取的用户基本信息。
-
-    说明:
-        - id: 用户 ID，UUID 字符串
-        - vision_name: 用户显示名称
-    """
-    id: str
-    account: str = ""
-    vision_name: str = ""
-    roles: Optional[Dict[str, bool]] = None
-    email: Optional[str] = None
-    telephone: Optional[str] = None
-    extra: Optional[Dict[str, Any]] = None
-
-    def __post_init__(self):
-        """初始化后处理。"""
-        if self.roles is None:
-            self.roles = {}
-        if self.extra is None:
-            self.extra = {}
-
+from src.ports.user_management_port import UserInfo
 
 # 创建上下文变量，用于存储当前请求的token
 _auth_token_context: contextvars.ContextVar[Optional[str]] = contextvars.ContextVar(
