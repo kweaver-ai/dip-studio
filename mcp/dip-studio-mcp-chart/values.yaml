@@ -37,10 +37,11 @@ resources:
     memory: 512Mi
 
 # Studio 内部接口 base URL（get_context 调用）；同 namespace 内可用 http://<service>.<namespace>:<port>
-# class-80：Ingress 暴露 /api/dip-mcp/v1，使用 HTTP 80 端口
+# Ingress 暴露 /api/dip-mcp/v1（HTTP 80）：须使用集群中存在的 IngressClass。
+# class-443 的 nginx-ingress-class-443 Service 已确认同时暴露 80/TCP 与 443/TCP，故用 class-443 统一处理 HTTP/HTTPS。
 depServices:
   class-80:
-    ingressClass: class-80
+    ingressClass: class-443
   class-443:
     ingressClass: class-443
   dip-studio:

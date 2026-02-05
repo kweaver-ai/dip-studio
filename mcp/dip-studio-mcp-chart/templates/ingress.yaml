@@ -9,7 +9,7 @@ metadata:
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
-  ingressClassName: {{ index .Values.depServices "class-80" "ingressClass" }}
+  ingressClassName: {{ index .Values.depServices "class-443" "ingressClass" }}
   rules:
     - http:
         paths:
