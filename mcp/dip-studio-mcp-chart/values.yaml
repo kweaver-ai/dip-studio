@@ -37,8 +37,10 @@ resources:
     memory: 512Mi
 
 # Studio 内部接口 base URL（get_context 调用）；同 namespace 内可用 http://<service>.<namespace>:<port>
-# class-443：Ingress 暴露 /api/dip-mcp/v1 供生产环境 MCP 客户端访问
+# class-80：Ingress 暴露 /api/dip-mcp/v1，使用 HTTP 80 端口
 depServices:
+  class-80:
+    ingressClass: class-80
   class-443:
     ingressClass: class-443
   dip-studio:
