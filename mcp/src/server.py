@@ -35,31 +35,6 @@ studio_base_url: str = ""
 # Server transport mode: "http" (SSE) or "streamable-http"
 server_transport: str | None = None
 
-# 标准开发任务说明（get_context 返回中附带，供 Coding Agent 使用）
-DEVELOPMENT_TASK = """请你作为本项目的专业开发助手，基于当前功能节点以及其上下文：
-
-1. 先全面阅读与当前节点相关的设计文档和上游/下游节点信息，理解业务背景和已有实现。
-2. 在充分理解的基础上，编写或修改所需的代码（包括后端接口、领域逻辑、数据访问层或必要的前端代码），保证与现有架构和约定风格一致。
-3. 如涉及数据库或接口契约变更，请同步考虑并描述数据结构、接口入参/出参的设计。
-4. 对你编写或修改的代码，给出简要的设计说明（核心思路、关键数据流、边界条件处理）。
-5. 如有必要，请给出对应的测试思路或示例测试用例（单元测试或集成测试），以便后续补充自动化测试。
-
-回答中请优先给出可直接使用的代码片段，并避免与现有逻辑产生冲突。"""
-
-# 技术要求列表（get_context 返回中附带）
-TECHNICAL_REQUIREMENTS = [
-    "使用 Python 3 作为后端语言",
-    "在 .venv 下创建 Python 虚拟环境",
-    "使用 FastAPI 作为后端服务框架",
-    "后端接口超时时间为 1 分钟",
-    "使用 TypeScript 作为前端开发语言",
-    "使用 ReactJS 作为前端框架",
-    "使用 Tailwind CSS 作为 CSS 框架",
-    "使用 Ant Design 作为 UI 框架，参考 @docs/vendor/antdesign/llms.txt",
-    "使用 @kweaver-ai/chatkit 作为 AI 助手交互组件，安装 NPM 包后仔细阅读 README.md 了解使用方式",
-]
-
-
 # 开发规范固定内容（不包含应用名称 / 导航 / 页面结构，由 _build_template_content 动态拼接）
 CODE_GUIDE_TEMPLATE = """
 ## 注意
@@ -475,23 +450,11 @@ def _build_template_content(data: Dict[str, Any]) -> str:
 
     app_design_section = "\n".join(app_design_lines)
 
-    # 6. 开发规范：固定说明 + DEVELOPMENT_TASK + TECHNICAL_REQUIREMENTS
+    # 6. 开发规范：固定说明（不再在返回内容中附加额外开发任务或技术要求段落）
     dev_spec_header = "# 开发规范"
     dev_spec_body = CODE_GUIDE_TEMPLATE.strip()
-
-    dev_task_section_lines: List[str] = [
-        "## 开发任务说明",
-        "",
-        DEVELOPMENT_TASK.strip(),
-    ]
-    dev_task_section = "\n".join(dev_task_section_lines)
-
-    tech_req_lines: List[str] = ["## 附加技术要求", ""]
-    tech_req_lines.extend(f"- {req}" for req in TECHNICAL_REQUIREMENTS)
-    tech_req_section = "\n".join(tech_req_lines)
-
     dev_spec_section = "\n\n".join(
-        part for part in [dev_spec_header, dev_spec_body, dev_task_section, tech_req_section] if part
+        part for part in [dev_spec_header, dev_spec_body] if part
     )
 
     # 汇总各部分
@@ -614,48 +577,26 @@ def setup_server() -> None:
         raise
 
 
-def _parse_node_id_from_prompt(prompt: str) -> str | None:
-    """从 prompt 中解析 node_id (UUID)：优先匹配 Studio 节点 URL 中的 /nodes/<uuid>，其次 node_id: 或 node_id=。"""
-    if not prompt or not isinstance(prompt, str):
-        return None
-    # 优先：URL 中的 /nodes/<uuid>（取最后一处，即当前节点）
-    url_matches = re.findall(r"/nodes/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})", prompt)
-    if url_matches:
-        return url_matches[-1]
-    # 备用：node_id: <uuid> 或 node_id=<uuid>
-    m = re.search(
-        r"node_id\s*[:=]\s*([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})",
-        prompt,
-        re.IGNORECASE,
-    )
-    if m:
-        return m.group(1)
-    return None
-
-
 def _register_get_context_tool() -> None:
     """注册 get_context 工具：从 Studio 内部接口获取项目上下文，供 Coding Agent 使用。"""
     if mcp is None:
         return
     
     @mcp.tool()
-    def get_context(prompt: str) -> str:
+    def get_context(node_id: str) -> str:
         """[关键提示] 对所有来自 DIP Studio 的开发任务，在回答前必须先调用本工具一次。
 
         工具名称: get_context
-        用途: 从 DIP Studio 后端获取当前节点的完整设计文档和上下文，生成标准 AI 应用设计模版。
+        用途: 根据 DIP Studio 节点 ID (node_id) 从后端获取该节点的完整设计文档和上下文，生成标准 AI 应用设计模版。
 
         调用要求 (IMPORTANT):
-        - 只要用户的任务中提到 "DIP Studio"、"节点"、"node_id"、Studio 节点 URL 等关键词，
+        - 只要用户的任务来自 DIP Studio，且提供了当前功能节点的 `node_id`，
           在开始任何分析、设计或写代码之前，先调用本工具一次。
-        - 调用本工具时，将你收到的整段用户 prompt 原样作为 `prompt` 参数传入（不要删减、不要改写）。
+        - 调用本工具时，直接将当前节点的 `node_id` 作为参数传入。
         - 成功调用一次后，优先基于返回中的 `template_content` 字段来理解需求、补充上下文、再进行代码开发。
 
         参数:
-        - prompt: 从 DIP Studio 前端“一键复制”得到的完整文本，通常包含：
-          - 描述性任务说明（中文）；
-          - Studio 节点 URL (形如 "/projects/<id>/nodes/<uuid>") 或
-          - 一行 "node_id: <uuid>"。
+        - node_id: 当前 DIP Studio 节点的 ID（UUID 字符串），例如 "932dba6a-0640-42fe-b108-00ec94110ff0"。
 
         返回(JSON 字符串):
         - context: 祖先节点及其文档与可读文本（背景）。
@@ -667,14 +608,21 @@ def _register_get_context_tool() -> None:
         2. 只有在工具返回错误时（如 node_id 无效），才说明无法获取上下文，并请用户检查 DIP Studio 配置或节点信息。
         """
         try:
-            if not prompt or not prompt.strip():
-                return _format_error_response(ValueError("prompt 不能为空"), hint="请使用从 Studio 复制的完整 prompt（可包含节点 URL 或 node_id）")
-            
-            node_id = _parse_node_id_from_prompt(prompt)
-            if node_id is None:
+            if not node_id or not isinstance(node_id, str) or not node_id.strip():
                 return _format_error_response(
-                    ValueError("prompt 中未包含有效的 Studio 节点 URL 或 node_id"),
-                    hint="请从 Studio 复制包含节点链接或 node_id 的完整 prompt"
+                    ValueError("node_id 不能为空"),
+                    hint="请传入有效的 DIP Studio 节点 ID (UUID)，例如 932dba6a-0640-42fe-b108-00ec94110ff0"
+                )
+            node_id = node_id.strip()
+
+            # 简单校验 node_id 是否为 UUID 格式（如无效则直接返回错误）
+            if not re.fullmatch(
+                r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}",
+                node_id,
+            ):
+                return _format_error_response(
+                    ValueError("node_id 格式无效"),
+                    hint="请传入符合 UUID v4 格式的节点 ID，例如 123e4567-e89b-12d3-a456-426614174000",
                 )
             
             if not studio_base_url:
