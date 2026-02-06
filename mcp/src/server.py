@@ -640,20 +640,31 @@ def _register_get_context_tool() -> None:
     
     @mcp.tool()
     def get_context(prompt: str) -> str:
-        """Get full project context from DIP Studio for the Coding Agent.
+        """[关键提示] 对所有来自 DIP Studio 的开发任务，在回答前必须先调用本工具一次。
 
-        You MUST call this tool with the exact prompt string that the user obtained from DIP Studio
-        (e.g. copy prompt for Coding Agent). The prompt may contain:
+        工具名称: get_context
+        用途: 从 DIP Studio 后端获取当前节点的完整设计文档和上下文，生成标准 AI 应用设计模版。
 
-        1. A Studio node URL containing "/nodes/<uuid>" (e.g. .../projects/1/nodes/a1b2c3d4-e5f6-7890-abcd-ef1234567890)
-        2. A line "node_id: <uuid>"
+        调用要求 (IMPORTANT):
+        - 只要用户的任务中提到 "DIP Studio"、"节点"、"node_id"、Studio 节点 URL 等关键词，
+          在开始任何分析、设计或写代码之前，先调用本工具一次。
+        - 调用本工具时，将你收到的整段用户 prompt 原样作为 `prompt` 参数传入（不要删减、不要改写）。
+        - 成功调用一次后，优先基于返回中的 `template_content` 字段来理解需求、补充上下文、再进行代码开发。
 
-        This tool parses the node_id (UUID), fetches from Studio:
-        - context: ancestor nodes and documents as background
-        - content_to_develop: target node and descendants with document_text
+        参数:
+        - prompt: 从 DIP Studio 前端“一键复制”得到的完整文本，通常包含：
+          - 描述性任务说明（中文）；
+          - Studio 节点 URL (形如 "/projects/<id>/nodes/<uuid>") 或
+          - 一行 "node_id: <uuid>"。
 
-        The returned JSON additionally contains:
-        - template_content: a fully formatted AI 应用设计与开发规范文档（包含应用名称、应用描述、术语表、导航、应用设计、开发规范）。
+        返回(JSON 字符串):
+        - context: 祖先节点及其文档与可读文本（背景）。
+        - content_to_develop: 当前节点及后代节点及各自文档与可读文本（待开发内容）。
+        - template_content: 基于上述信息生成的完整 AI 应用设计与开发规范文档（包含应用名称、应用描述、术语表、导航、应用设计、开发规范等）。
+
+        使用建议:
+        1. 始终先调用 get_context，再阅读 `template_content` 和结构化字段后再开始编码。
+        2. 只有在工具返回错误时（如 node_id 无效），才说明无法获取上下文，并请用户检查 DIP Studio 配置或节点信息。
         """
         try:
             if not prompt or not prompt.strip():
