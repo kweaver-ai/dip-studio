@@ -7,13 +7,13 @@ metadata:
     nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-origin: "*"
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/rewrite-target: /mcp$1
 spec:
   ingressClassName: {{ index .Values.depServices "class-443" "ingressClass" }}
   rules:
     - http:
         paths:
-          - path: /api/dip-mcp/v1/(.*)
+          - path: /dip-studio/mcp(.*)
             pathType: ImplementationSpecific
             backend:
               service:
