@@ -40,8 +40,6 @@ resources:
 # Ingress 暴露 /api/dip-mcp/v1（HTTP 80）：须使用集群中存在的 IngressClass。
 # class-443 的 nginx-ingress-class-443 Service 已确认同时暴露 80/TCP 与 443/TCP，故用 class-443 统一处理 HTTP/HTTPS。
 depServices:
-  class-80:
-    ingressClass: class-443
   class-443:
     ingressClass: class-443
   dip-studio:
