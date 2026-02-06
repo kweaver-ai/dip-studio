@@ -25,6 +25,7 @@ from src.infrastructure.exceptions import BusinessException, create_error_respon
 from src.infrastructure.container import init_container, get_container
 from src.infrastructure.logging.logger import setup_logging
 from src.infrastructure.middleware.auth_middleware import AuthMiddleware
+from scripts.init_db import init_mariadb
 from src.routers.health_router import create_health_router
 from src.routers.project_router import create_project_router
 from src.routers.node_router import create_node_router, create_project_nodes_router
@@ -57,6 +58,13 @@ def create_app(settings: Settings = None) -> FastAPI:
         """应用生命周期管理器。"""
         logger.info(f"启动 {settings.app_name} v{settings.app_version}")
         logger.info(f"服务运行在 {settings.host}:{settings.port}")
+
+        # 启动时检查并自动创建数据库表（若不存在）
+        try:
+            await init_mariadb(settings)
+        except Exception as e:
+            logger.exception(f"数据库表初始化失败: {e}")
+            raise
 
         # 初始化完成后标记服务为就绪状态
         container.set_ready(True)

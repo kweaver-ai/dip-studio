@@ -7,7 +7,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 import httpx
 
@@ -58,6 +58,452 @@ TECHNICAL_REQUIREMENTS = [
     "使用 Ant Design 作为 UI 框架，参考 @docs/vendor/antdesign/llms.txt",
     "使用 @kweaver-ai/chatkit 作为 AI 助手交互组件，安装 NPM 包后仔细阅读 README.md 了解使用方式",
 ]
+
+
+# 开发规范固定内容（不包含应用名称 / 导航 / 页面结构，由 _build_template_content 动态拼接）
+CODE_GUIDE_TEMPLATE = """
+## 注意
+- 在编写代码前，一定要仔细阅读文档
+- 完全按照应用设计来开发，不要实现任何应用设计中没有提到的功能
+- 不要 Mock 任何数据，如果获取不到数据显示 “--”
+
+## 技术规格
+- 使用 TypeScript 作为前端开发语言
+- 使用 ReactJS 作为前端框架
+- 使用 React Router 6 作为前端路由框架
+- 使用 axios 作为 HTTP 库
+- 使用 Tailwind CSS 作为 CSS 框架
+- 使用 Vite 作为打包工具
+- 使用 Ant Design 作为 UI 框架，先阅读一遍组件列表 https://ant.design/llms.txt，在需要的时候仔细查阅组件 API
+- 使用 @kweaver-ai/chatkit 作为 AI 助手交互组件，安装 NPM 包后仔细阅读 README.md 了解使用方式
+
+## 调试
+- 使用 Vite 进行本地代理解决 CORS 问题，代理地址为：/api
+- 使用环境变量注入以下参数：
+  - API 服务根路径
+  - token
+
+## 代码要求
+你要开发的是一个 qiankun 微应用，项目代码必须遵循以下要求。
+
+## 主应用注入的 props
+以下是由主应用注入的，在微应用中需要使用到的 props，推荐在前端项目中定义为 TypeScript 的 `MicroAppProps` 接口。其语义如下（JSON Schema 形式，仅供说明）：
+
+```yaml
+$schema: https://json-schema.org/draft/2020-12/schema
+$title: MicroAppProps
+
+MicroAppProps:
+  type: object
+  properties:
+    token:
+      type: object
+      properties:
+        $ref: '#/schema/GetAccessToken'
+        $ref: '#/schema/RefreshToken'
+        $ref: '#/schema/TokenExpiredHandler'
+    route:
+      $ref: '#/schema/Route'
+    User:
+      $ref: '#/schema/User'
+    renderAppMenu:
+      $ref: '#/schema/RenderAppMenu'
+    logout:
+      $ref: '#/schema/Logout'
+    SetMicroAppState:
+      $ref: '#/schema/SetMicroAppState'
+    onMicroAppStateChange:
+      $ref: '#/schema/MicroAppStateChangeHandler'
+    container:
+      $ref: '#/schema/RootContainer'
+
+schema:
+  GetAccessToken:
+    type: function
+    name: accessToken
+    summary: 获取 Access Token
+    returns:
+      type: string
+      description: 返回 Token
+
+  RefreshToken:
+    type: function
+    name: refreshToken
+    summary: 刷新 Access Token
+    returns:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: 返回新的 Access Token
+
+  TokenExpiredHandler:
+    type: function
+    name: onTokenExpired
+    summary: Token 过期处理函数
+    parameters:
+      - name: code
+        type: number
+        description: 可选的错误码
+
+  Route:
+    type: object
+    properties:
+      basename:
+        type: string
+        description: 应用路由基础路径，例如 "dip-hub/application/123"
+
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+      vision_name:
+        type: getter
+        description: 获取用户显示名称
+        returns:
+          type: string
+      account:
+        type: getter
+        description: 获取用户账号
+
+  RenderAppMenu:
+    type: function
+    description: 渲染应用菜单
+    parameters:
+      - name: container
+        type: (HTMLElement | string)
+
+  Logout:
+    type: function
+    description: 用户登出函数
+
+  SetMicroAppState:
+    type: function
+    description: 设置微应用状态
+    parameters:
+      - name: state
+        type: Record<string, any>
+    returns:
+      type: boolean
+
+  MicroAppStateChangeHandler:
+    type: function
+    description: 监听微应用状态变化
+    parameters:
+      - type: function
+        name: callback
+        description: 状态变化回调函数
+        parameters:
+          - name: state
+            type: any
+          - name: prev
+            type: any
+      - name: fireImmediately
+        type: boolean
+        description: 是否立即触发回调
+    returns:
+      type: function
+      description: 取消监听函数
+
+  RootContainer:
+    type: HTMLElement
+    description: 容器元素
+```
+
+### 导出 qiankun 生命周期函数
+入口文件 `main.tsx` 中需要导出 `bootstrap`、`mount`、`unmount` 三个 qiankun 生命周期函数，例如：
+
+```tsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { ConfigProvider } from "antd";
+import { renderWithQiankun, qiankunWindow } from "vite-plugin-qiankun/dist/helper";
+import App from "./App";
+import type { MicroAppProps } from "./micro-app";
+
+let root: ReturnType<typeof ReactDOM.createRoot> | null = null;
+
+const render = ({ container, route, token, user, setMicroAppState, onMicroAppStateChange }: MicroAppProps = {}) => {
+  const rootElement = container ? container.querySelector("#root") || container : document.querySelector("#root");
+
+  if (!rootElement) {
+    return;
+  }
+
+  if (root) {
+    root.unmount();
+  }
+
+  root = ReactDOM.createRoot(rootElement as HTMLElement);
+  root.render(
+    <React.StrictMode>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#b45309",
+            colorTextBase: "#1f2937",
+            fontFamily:
+              "'IBM Plex Sans', 'Noto Sans SC', 'PingFang SC', sans-serif"
+          }
+        }}
+      >
+        <App
+          basename={route?.basename}
+          token={token}
+          user={user}
+          setMicroAppState={setMicroAppState}
+          onMicroAppStateChange={onMicroAppStateChange}
+        />
+      </ConfigProvider>
+    </React.StrictMode>
+  );
+};
+
+renderWithQiankun({
+  mount(props) {
+    console.log("[微应用] mount", props);
+    render(props);
+  },
+  bootstrap() {
+    console.log("[微应用] bootstrap");
+  },
+  unmount(props: any) {
+    console.log("[微应用] unmount");
+    if (root) {
+      root.unmount();
+      root = null;
+    }
+  },
+  update(props: any) {
+    console.log("[微应用] update", props);
+  }
+});
+
+if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
+  render();
+}
+```
+
+### 路由
+从 props 中获取 `basename` 并传递给路由应用，示例：
+
+```tsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import type { MicroAppProps } from "./micro-app";
+
+const App = ({ basename = "/" }: MicroAppProps) => {
+  return (
+    <BrowserRouter basename={basename}>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* 其他路由 */}
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;
+```
+
+### 认证集成
+在微应用中接收主应用注入的 token 和用户信息，典型使用方式：
+
+```tsx
+import { BrowserRouter } from "react-router-dom";
+import type { MicroAppProps } from "./micro-app";
+
+const App = ({ basename, token, user }: MicroAppProps) => {
+  useEffect(() => {
+    if (token) {
+      // 设置 HTTP 请求的 token
+      // axios.defaults.headers.common["Authorization"] = `Bearer ${token.accessToken}`;
+
+      // 监听 token 过期
+      if (token.onTokenExpired) {
+        // 在 HTTP 拦截器中调用
+      }
+    }
+  }, [token]);
+
+  return (
+    <BrowserRouter basename={basename}>
+      {/* 应用内容 */}
+    </BrowserRouter>
+  );
+};
+```
+
+### 适配 Vite 与构建
+- 微应用基于 Vite 构建，需要引入 `vite-plugin-qiankun`。
+- 在 `vite.config.ts` 中配置 qiankun 插件，并设置 `base` 属性与 `packageName` 对应，例如：
+
+```ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import qiankun from "vite-plugin-qiankun";
+
+const packageName = "dip-for-talent";
+
+export default defineConfig(({ mode }) => ({
+  plugins: [
+    react(),
+    qiankun(packageName, {
+      useDevMode: mode === "development"
+    })
+  ],
+  base: "/dip-for-talent/"
+}));
+```
+"""
+
+
+def _build_template_content(data: Dict[str, Any]) -> str:
+    """
+    基于 Studio 返回的 context/content_to_develop 构建完整的 AI 应用设计 + 开发规范模版内容。
+
+    结构包括：
+    - 应用名称 / 应用描述
+    - 术语表
+    - 导航（多页面时）
+    - 应用设计（页面 + 功能 + 文档内容）
+    - 开发规范（固定说明 + DEVELOPMENT_TASK + TECHNICAL_REQUIREMENTS）
+    """
+    context_items: List[Dict[str, Any]] = list(data.get("context") or [])
+    content_items: List[Dict[str, Any]] = list(data.get("content_to_develop") or [])
+    all_items: List[Dict[str, Any]] = context_items + content_items
+
+    def _get_node(item: Dict[str, Any]) -> Dict[str, Any]:
+        return item.get("node") or {}
+
+    # 应用节点：优先从 context 中查找 node_type == application
+    app_item: Optional[Dict[str, Any]] = None
+    for item in all_items:
+        node = _get_node(item)
+        if node.get("node_type") == "application":
+            app_item = item
+            break
+
+    app_node: Dict[str, Any] = _get_node(app_item) if app_item else {}
+    app_name: str = app_node.get("name") or ""
+    app_description: str = app_node.get("description") or ""
+
+    # 1. 基本信息：应用名称 / 应用描述
+    basic_section_lines: List[str] = [
+        "开发 AI 应用。",
+        "",
+        f"- 应用名称：{app_name or '--'}",
+        f"- 应用描述：{app_description or '--'}",
+    ]
+    basic_section = "\n".join(basic_section_lines)
+
+    # 2. 术语表：当前版本仅输出表头和占位行，后续可从文档中解析
+    glossary_lines: List[str] = [
+        "# 术语表",
+        "",
+        "| 术语 | 解释 |",
+        "| -- | -- |",
+        "| -- | -- |",
+    ]
+    glossary_section = "\n".join(glossary_lines)
+
+    # 3. 页面与功能分组
+    pages_by_id: Dict[str, Dict[str, Any]] = {}
+    for item in all_items:
+        node = _get_node(item)
+        if node.get("node_type") == "page" and node.get("id"):
+            pages_by_id[node["id"]] = {"node": node, "item": item}
+
+    # functions 仅从 content_to_develop 中聚合（目标节点及其后代）
+    functions_by_page_id: Dict[str, List[Dict[str, Any]]] = {}
+    for item in content_items:
+        node = _get_node(item)
+        if node.get("node_type") == "function":
+            parent_id = node.get("parent_id")
+            if parent_id:
+                functions_by_page_id.setdefault(parent_id, []).append(item)
+
+    # 页面按 sort 排序（若存在）
+    pages: List[Dict[str, Any]] = list(pages_by_id.values())
+    pages.sort(key=lambda p: (p["node"].get("sort") is None, p["node"].get("sort", 0)))
+
+    # 4. 导航（多页面时才生成）
+    nav_section = ""
+    if len(pages) > 1 and app_name:
+        nav_lines: List[str] = [app_name]
+        for page in pages:
+            node = page["node"]
+            page_name = node.get("name") or "--"
+            page_desc = node.get("description") or "--"
+            nav_lines.append(f"  |-- {page_name}: {page_desc}")
+        nav_body = "\n".join(nav_lines)
+        nav_section = "# 导航\n\n```\n" + nav_body + "\n```"
+
+    # 5. 应用设计：按页面分组功能节点
+    app_design_lines: List[str] = ["# 应用设计"]
+    if not pages:
+        app_design_lines.append("")
+        app_design_lines.append("（当前节点下暂无页面节点）")
+    else:
+        for page_idx, page in enumerate(pages, start=1):
+            node = page["node"]
+            page_id = node.get("id")
+            page_name = node.get("name") or "--"
+
+            app_design_lines.append("")
+            app_design_lines.append(f"## {page_name}")
+
+            functions: List[Dict[str, Any]] = functions_by_page_id.get(page_id, [])
+            if not functions:
+                app_design_lines.append("")
+                app_design_lines.append("（该页面当前没有功能节点）")
+                continue
+
+            for func_idx, func_item in enumerate(functions, start=1):
+                func_node = _get_node(func_item)
+                func_name = func_node.get("name") or "--"
+                title_no = f"{page_idx}.{func_idx}"
+
+                app_design_lines.append("")
+                app_design_lines.append(f"### 功能 {title_no} {func_name}")
+
+                doc_text = (func_item.get("document_text") or "").strip()
+                if not doc_text:
+                    doc_text = "--"
+                app_design_lines.append("")
+                app_design_lines.append(doc_text)
+
+    app_design_section = "\n".join(app_design_lines)
+
+    # 6. 开发规范：固定说明 + DEVELOPMENT_TASK + TECHNICAL_REQUIREMENTS
+    dev_spec_header = "# 开发规范"
+    dev_spec_body = CODE_GUIDE_TEMPLATE.strip()
+
+    dev_task_section_lines: List[str] = [
+        "## 开发任务说明",
+        "",
+        DEVELOPMENT_TASK.strip(),
+    ]
+    dev_task_section = "\n".join(dev_task_section_lines)
+
+    tech_req_lines: List[str] = ["## 附加技术要求", ""]
+    tech_req_lines.extend(f"- {req}" for req in TECHNICAL_REQUIREMENTS)
+    tech_req_section = "\n".join(tech_req_lines)
+
+    dev_spec_section = "\n\n".join(
+        part for part in [dev_spec_header, dev_spec_body, dev_task_section, tech_req_section] if part
+    )
+
+    # 汇总各部分
+    sections: List[str] = [
+        basic_section,
+        glossary_section,
+        nav_section,
+        app_design_section,
+        dev_spec_section,
+    ]
+
+    return "\n\n".join(part for part in sections if part)
 
 
 def _format_error_response(error: Exception, **kwargs: Any) -> str:
@@ -194,7 +640,21 @@ def _register_get_context_tool() -> None:
     
     @mcp.tool()
     def get_context(prompt: str) -> str:
-        """Get full project context from DIP Studio for the Coding Agent. You MUST call this tool with the exact prompt string that the user obtained from DIP Studio (e.g. copy prompt for Coding Agent). The prompt may contain (1) a Studio node URL containing \"/nodes/<uuid>\" (e.g. .../projects/1/nodes/a1b2c3d4-e5f6-7890-abcd-ef1234567890), or (2) a line \"node_id: <uuid>\". This tool parses the node_id (UUID), fetches from Studio: context (ancestor nodes and documents as background) and content_to_develop (target node and descendants with document_text). Use the returned JSON to write or update code. Input: prompt (string, may be in Chinese). Output: JSON with \"context\" and \"content_to_develop\", each a list of { \"node\", \"document\", \"document_text\" }."""
+        """Get full project context from DIP Studio for the Coding Agent.
+
+        You MUST call this tool with the exact prompt string that the user obtained from DIP Studio
+        (e.g. copy prompt for Coding Agent). The prompt may contain:
+
+        1. A Studio node URL containing "/nodes/<uuid>" (e.g. .../projects/1/nodes/a1b2c3d4-e5f6-7890-abcd-ef1234567890)
+        2. A line "node_id: <uuid>"
+
+        This tool parses the node_id (UUID), fetches from Studio:
+        - context: ancestor nodes and documents as background
+        - content_to_develop: target node and descendants with document_text
+
+        The returned JSON additionally contains:
+        - template_content: a fully formatted AI 应用设计与开发规范文档（包含应用名称、应用描述、术语表、导航、应用设计、开发规范）。
+        """
         try:
             if not prompt or not prompt.strip():
                 return _format_error_response(ValueError("prompt 不能为空"), hint="请使用从 Studio 复制的完整 prompt（可包含节点 URL 或 node_id）")
@@ -212,17 +672,19 @@ def _register_get_context_tool() -> None:
                     hint="请在 config.yaml 中配置 studio.base_url"
                 )
             
-            import httpx
             url = f"{studio_base_url}/internal/api/dip-studio/v1/nodes/{node_id}/application-detail"
             with httpx.Client(timeout=30.0) as client:
                 resp = client.get(url)
                 resp.raise_for_status()
                 data = resp.json()
-            # 在 MCP 侧拼接开发任务与技术要求，供 Coding Agent 直接使用
+            # 在 MCP 侧拼接模版化内容，供 Coding Agent 直接使用（开发任务与技术要求已内嵌于 template_content）
             if isinstance(data, dict):
                 data = dict(data)
-                data["development_task"] = DEVELOPMENT_TASK
-                data["technical_requirements"] = TECHNICAL_REQUIREMENTS
+                try:
+                    data["template_content"] = _build_template_content(data)
+                except Exception as build_err:
+                    # 构建模版内容失败时，仅记录日志，不影响基础上下文返回
+                    logger.exception(f"构建 template_content 失败: {build_err}")
             return _format_success_response(data)
         except httpx.HTTPStatusError as e:
             logger.error(f"Studio 请求失败: {e.response.status_code} {e.response.text}")
