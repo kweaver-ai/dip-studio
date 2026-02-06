@@ -653,8 +653,6 @@ def _register_get_context_tool() -> None:
         - content_to_develop: target node and descendants with document_text
 
         The returned JSON additionally contains:
-        - development_task: standard development task description
-        - technical_requirements: list of technical requirements
         - template_content: a fully formatted AI 应用设计与开发规范文档（包含应用名称、应用描述、术语表、导航、应用设计、开发规范）。
         """
         try:
@@ -679,11 +677,9 @@ def _register_get_context_tool() -> None:
                 resp = client.get(url)
                 resp.raise_for_status()
                 data = resp.json()
-            # 在 MCP 侧拼接开发任务、技术要求与模版化内容，供 Coding Agent 直接使用
+            # 在 MCP 侧拼接模版化内容，供 Coding Agent 直接使用（开发任务与技术要求已内嵌于 template_content）
             if isinstance(data, dict):
                 data = dict(data)
-                data["development_task"] = DEVELOPMENT_TASK
-                data["technical_requirements"] = TECHNICAL_REQUIREMENTS
                 try:
                     data["template_content"] = _build_template_content(data)
                 except Exception as build_err:
