@@ -4,6 +4,7 @@
 实现 NodePort 接口的 MariaDB 适配器。
 """
 import logging
+import uuid
 from datetime import datetime
 from typing import List, Optional
 
@@ -45,9 +46,9 @@ class NodeAdapter(NodePort):
             ProjectNode: 节点领域模型
         """
         return ProjectNode(
-            id=row[0],
+            id=str(row[0]) if row[0] is not None else "",
             project_id=row[1],
-            parent_id=row[2],
+            parent_id=str(row[2]) if row[2] is not None else None,
             node_type=NodeType(row[3]),
             name=row[4],
             description=row[5],
@@ -63,14 +64,14 @@ class NodeAdapter(NodePort):
             edited_at=row[15],
         )
 
-    async def get_node_by_id(self, node_id: int) -> ProjectNode:
+    async def get_node_by_id(self, node_id: str) -> ProjectNode:
         """根据节点 ID 获取节点信息。"""
         node = await self.get_node_by_id_optional(node_id)
         if node is None:
             raise ValueError(f"节点不存在: id={node_id}")
         return node
 
-    async def get_node_by_id_optional(self, node_id: int) -> Optional[ProjectNode]:
+    async def get_node_by_id_optional(self, node_id: str) -> Optional[ProjectNode]:
         """根据节点 ID 获取节点信息（可选）。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
@@ -123,7 +124,7 @@ class NodeAdapter(NodePort):
                     return None
                 return self._row_to_node(row)
 
-    async def get_children(self, node_id: int) -> List[ProjectNode]:
+    async def get_children(self, node_id: str) -> List[ProjectNode]:
         """获取节点的直接子节点。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
@@ -140,7 +141,7 @@ class NodeAdapter(NodePort):
                 rows = await cursor.fetchall()
                 return [self._row_to_node(row) for row in rows]
 
-    async def get_descendants(self, node_id: int) -> List[ProjectNode]:
+    async def get_descendants(self, node_id: str) -> List[ProjectNode]:
         """获取节点的所有后代节点。"""
         # 首先获取当前节点的路径
         node = await self.get_node_by_id_optional(node_id)
@@ -163,7 +164,7 @@ class NodeAdapter(NodePort):
                 rows = await cursor.fetchall()
                 return [self._row_to_node(row) for row in rows]
 
-    async def has_children(self, node_id: int) -> bool:
+    async def has_children(self, node_id: str) -> bool:
         """检查节点是否有子节点。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
@@ -177,23 +178,33 @@ class NodeAdapter(NodePort):
 
     async def create_node(self, node: ProjectNode) -> ProjectNode:
         """创建新节点。"""
+        node.id = str(uuid.uuid4())
+        now = datetime.now()
+        if node.parent_id:
+            parent = await self.get_node_by_id(node.parent_id)
+            node.path = f"{parent.path}/node_{node.id}"
+        else:
+            node.path = f"/node_{node.id}"
+        node.created_at = now
+        node.edited_at = now
+
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
-                now = datetime.now()
                 await cursor.execute(
                     """INSERT INTO project_node 
-                       (project_id, parent_id, node_type, name, description, path, sort, 
+                       (id, project_id, parent_id, node_type, name, description, path, sort, 
                         status, document_id, creator_id, creator_name, created_at,
                         editor_id, editor_name, edited_at)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                     (
+                        node.id,
                         node.project_id,
                         node.parent_id,
                         node.node_type.value,
                         node.name,
                         node.description,
-                        node.path or "",  # 临时路径，创建后更新
+                        node.path,
                         node.sort,
                         node.status,
                         node.document_id,
@@ -205,26 +216,10 @@ class NodeAdapter(NodePort):
                         now,
                     )
                 )
-                node.id = cursor.lastrowid
-                node.created_at = now
-                node.edited_at = now
-                
-                # 更新节点路径
-                if node.parent_id:
-                    parent = await self.get_node_by_id(node.parent_id)
-                    node.path = f"{parent.path}/node_{node.id}"
-                else:
-                    node.path = f"/node_{node.id}"
-                
-                await cursor.execute(
-                    "UPDATE project_node SET path = %s WHERE id = %s",
-                    (node.path, node.id)
-                )
-                
                 logger.info(f"创建节点成功: id={node.id}, type={node.node_type.value}")
                 return node
 
-    async def update_node_document_id(self, node_id: int, document_id: int) -> bool:
+    async def update_node_document_id(self, node_id: str, document_id: int) -> bool:
         """更新功能节点关联的文档 ID。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
@@ -263,7 +258,7 @@ class NodeAdapter(NodePort):
                 logger.info(f"更新节点成功: id={node.id}")
                 return node
 
-    async def update_node_path(self, node_id: int, new_path: str) -> bool:
+    async def update_node_path(self, node_id: str, new_path: str) -> bool:
         """更新节点路径。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
@@ -276,7 +271,7 @@ class NodeAdapter(NodePort):
 
     async def update_descendants_path(
         self,
-        node_id: int,
+        node_id: str,
         old_path: str,
         new_path: str,
     ) -> int:
@@ -295,8 +290,8 @@ class NodeAdapter(NodePort):
 
     async def move_node(
         self,
-        node_id: int,
-        new_parent_id: Optional[int],
+        node_id: str,
+        new_parent_id: Optional[str],
         new_sort: int,
         editor_id: str = "",
         editor_name: str = "",
@@ -350,7 +345,7 @@ class NodeAdapter(NodePort):
                 logger.info(f"移动节点成功: id={node_id}, new_parent_id={new_parent_id}")
                 return node
 
-    async def delete_node(self, node_id: int) -> bool:
+    async def delete_node(self, node_id: str) -> bool:
         """删除节点。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
@@ -378,7 +373,7 @@ class NodeAdapter(NodePort):
                 logger.info(f"删除项目节点成功: project_id={project_id}, count={count}")
                 return count
 
-    async def get_max_sort(self, parent_id: Optional[int], project_id: int) -> int:
+    async def get_max_sort(self, parent_id: Optional[str], project_id: int) -> int:
         """获取同级节点的最大排序值。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:

@@ -17,12 +17,12 @@ class NodePort(ABC):
     """
 
     @abstractmethod
-    async def get_node_by_id(self, node_id: int) -> ProjectNode:
+    async def get_node_by_id(self, node_id: str) -> ProjectNode:
         """
         根据节点 ID 获取节点信息。
 
         参数:
-            node_id: 节点主键 ID
+            node_id: 节点主键 ID (UUID)
 
         返回:
             ProjectNode: 节点实体
@@ -33,12 +33,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def get_node_by_id_optional(self, node_id: int) -> Optional[ProjectNode]:
+    async def get_node_by_id_optional(self, node_id: str) -> Optional[ProjectNode]:
         """
         根据节点 ID 获取节点信息（可选）。
 
         参数:
-            node_id: 节点主键 ID
+            node_id: 节点主键 ID (UUID)
 
         返回:
             Optional[ProjectNode]: 节点实体，不存在时返回 None
@@ -72,12 +72,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def get_children(self, node_id: int) -> List[ProjectNode]:
+    async def get_children(self, node_id: str) -> List[ProjectNode]:
         """
         获取节点的直接子节点。
 
         参数:
-            node_id: 父节点 ID
+            node_id: 父节点 ID (UUID)
 
         返回:
             List[ProjectNode]: 子节点列表
@@ -85,12 +85,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def get_descendants(self, node_id: int) -> List[ProjectNode]:
+    async def get_descendants(self, node_id: str) -> List[ProjectNode]:
         """
         获取节点的所有后代节点。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
 
         返回:
             List[ProjectNode]: 后代节点列表
@@ -98,12 +98,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def has_children(self, node_id: int) -> bool:
+    async def has_children(self, node_id: str) -> bool:
         """
         检查节点是否有子节点。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
 
         返回:
             bool: 是否有子节点
@@ -140,12 +140,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def update_node_document_id(self, node_id: int, document_id: int) -> bool:
+    async def update_node_document_id(self, node_id: str, document_id: int) -> bool:
         """
         更新功能节点关联的文档 ID。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
             document_id: 文档 ID
 
         返回:
@@ -154,12 +154,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def update_node_path(self, node_id: int, new_path: str) -> bool:
+    async def update_node_path(self, node_id: str, new_path: str) -> bool:
         """
         更新节点路径。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
             new_path: 新路径
 
         返回:
@@ -170,7 +170,7 @@ class NodePort(ABC):
     @abstractmethod
     async def update_descendants_path(
         self,
-        node_id: int,
+        node_id: str,
         old_path: str,
         new_path: str,
     ) -> int:
@@ -178,7 +178,7 @@ class NodePort(ABC):
         更新所有后代节点的路径。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
             old_path: 旧路径前缀
             new_path: 新路径前缀
 
@@ -190,8 +190,8 @@ class NodePort(ABC):
     @abstractmethod
     async def move_node(
         self,
-        node_id: int,
-        new_parent_id: Optional[int],
+        node_id: str,
+        new_parent_id: Optional[str],
         new_sort: int,
         editor_id: str = "",
         editor_name: str = "",
@@ -200,8 +200,8 @@ class NodePort(ABC):
         移动节点到新的父节点下。
 
         参数:
-            node_id: 节点 ID
-            new_parent_id: 新父节点 ID
+            node_id: 节点 ID (UUID)
+            new_parent_id: 新父节点 ID (UUID)
             new_sort: 新的排序值
             editor_id: 编辑者用户 ID（UUID 字符串）
             editor_name: 编辑者用户显示名
@@ -215,12 +215,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def delete_node(self, node_id: int) -> bool:
+    async def delete_node(self, node_id: str) -> bool:
         """
         删除节点。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
 
         返回:
             bool: 是否删除成功
@@ -244,12 +244,12 @@ class NodePort(ABC):
         pass
 
     @abstractmethod
-    async def get_max_sort(self, parent_id: Optional[int], project_id: int) -> int:
+    async def get_max_sort(self, parent_id: Optional[str], project_id: int) -> int:
         """
         获取同级节点的最大排序值。
 
         参数:
-            parent_id: 父节点 ID
+            parent_id: 父节点 ID (UUID)
             project_id: 项目 ID
 
         返回:

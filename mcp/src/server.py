@@ -168,18 +168,22 @@ def setup_server() -> None:
         raise
 
 
-def _parse_node_id_from_prompt(prompt: str) -> int | None:
-    """从 prompt 中解析 node_id：优先匹配 Studio 节点 URL 中的 /nodes/<id>，其次 node_id: 或 node_id=。"""
+def _parse_node_id_from_prompt(prompt: str) -> str | None:
+    """从 prompt 中解析 node_id (UUID)：优先匹配 Studio 节点 URL 中的 /nodes/<uuid>，其次 node_id: 或 node_id=。"""
     if not prompt or not isinstance(prompt, str):
         return None
-    # 优先：URL 中的 /nodes/数字（取最后一处，即当前节点）
-    matches = re.findall(r"/nodes/(\d+)", prompt)
-    if matches:
-        return int(matches[-1])
-    # 备用：node_id: 123 或 node_id=123
-    m = re.search(r"node_id\s*[:=]\s*(\d+)", prompt, re.IGNORECASE)
+    # 优先：URL 中的 /nodes/<uuid>（取最后一处，即当前节点）
+    url_matches = re.findall(r"/nodes/([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})", prompt)
+    if url_matches:
+        return url_matches[-1]
+    # 备用：node_id: <uuid> 或 node_id=<uuid>
+    m = re.search(
+        r"node_id\s*[:=]\s*([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})",
+        prompt,
+        re.IGNORECASE,
+    )
     if m:
-        return int(m.group(1))
+        return m.group(1)
     return None
 
 
@@ -190,7 +194,7 @@ def _register_get_context_tool() -> None:
     
     @mcp.tool()
     def get_context(prompt: str) -> str:
-        """Get full project context from DIP Studio for the Coding Agent. You MUST call this tool with the exact prompt string that the user obtained from DIP Studio (e.g. copy prompt for Coding Agent). The prompt may contain (1) a Studio node URL containing \"/nodes/<id>\" (e.g. .../projects/1/nodes/42), or (2) a line \"node_id: <id>\". This tool parses the node_id, fetches from Studio: context (ancestor nodes and documents as background) and content_to_develop (target node and descendants with document_text). Use the returned JSON to write or update code. Input: prompt (string, may be in Chinese). Output: JSON with \"context\" and \"content_to_develop\", each a list of { \"node\", \"document\", \"document_text\" }."""
+        """Get full project context from DIP Studio for the Coding Agent. You MUST call this tool with the exact prompt string that the user obtained from DIP Studio (e.g. copy prompt for Coding Agent). The prompt may contain (1) a Studio node URL containing \"/nodes/<uuid>\" (e.g. .../projects/1/nodes/a1b2c3d4-e5f6-7890-abcd-ef1234567890), or (2) a line \"node_id: <uuid>\". This tool parses the node_id (UUID), fetches from Studio: context (ancestor nodes and documents as background) and content_to_develop (target node and descendants with document_text). Use the returned JSON to write or update code. Input: prompt (string, may be in Chinese). Output: JSON with \"context\" and \"content_to_develop\", each a list of { \"node\", \"document\", \"document_text\" }."""
         try:
             if not prompt or not prompt.strip():
                 return _format_error_response(ValueError("prompt 不能为空"), hint="请使用从 Studio 复制的完整 prompt（可包含节点 URL 或 node_id）")

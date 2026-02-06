@@ -63,7 +63,7 @@ class NodeService:
             return None
         
         # 构建节点映射
-        node_map: Dict[int, ProjectNode] = {node.id: node for node in nodes}
+        node_map: Dict[str, ProjectNode] = {node.id: node for node in nodes}
         
         # 清空子节点列表（避免重复）
         for node in nodes:
@@ -119,7 +119,7 @@ class NodeService:
             raise ValueError("项目已存在应用节点，一个项目只能有一个应用节点")
         
         node = ProjectNode(
-            id=0,
+            id="",
             project_id=project_id,
             node_type=NodeType.APPLICATION,
             name=name,
@@ -136,7 +136,7 @@ class NodeService:
     async def create_page_node(
         self,
         project_id: int,
-        parent_id: int,
+        parent_id: str,
         name: str,
         description: Optional[str] = None,
         creator_id: str = "",
@@ -172,7 +172,7 @@ class NodeService:
         max_sort = await self._node_port.get_max_sort(parent_id, project_id)
         
         node = ProjectNode(
-            id=0,
+            id="",
             project_id=project_id,
             node_type=NodeType.PAGE,
             name=name,
@@ -190,7 +190,7 @@ class NodeService:
     async def create_function_node(
         self,
         project_id: int,
-        parent_id: int,
+        parent_id: str,
         name: str,
         description: Optional[str] = None,
         creator_id: str = "",
@@ -226,7 +226,7 @@ class NodeService:
         max_sort = await self._node_port.get_max_sort(parent_id, project_id)
         
         node = ProjectNode(
-            id=0,
+            id="",
             project_id=project_id,
             node_type=NodeType.FUNCTION,
             name=name,
@@ -261,7 +261,7 @@ class NodeService:
 
     async def update_node(
         self,
-        node_id: int,
+        node_id: str,
         name: Optional[str] = None,
         description: Optional[str] = None,
         editor_id: str = "",
@@ -271,7 +271,7 @@ class NodeService:
         更新节点信息。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
             name: 新的节点名称
             description: 新的节点描述
             editor_id: 编辑者用户 ID（UUID 字符串）
@@ -294,9 +294,9 @@ class NodeService:
 
     async def move_node(
         self,
-        node_id: int,
-        new_parent_id: Optional[int],
-        predecessor_node_id: Optional[int] = None,
+        node_id: str,
+        new_parent_id: Optional[str],
+        predecessor_node_id: Optional[str] = None,
         editor_id: str = "",
         editor_name: str = "",
     ) -> ProjectNode:
@@ -304,8 +304,8 @@ class NodeService:
         移动节点到新的父节点下。
 
         参数:
-            node_id: 节点 ID
-            new_parent_id: 新父节点 ID
+            node_id: 节点 ID (UUID)
+            new_parent_id: 新父节点 ID (UUID)
             predecessor_node_id: 前置节点 ID（新父节点下的直接子节点，移动后位于该节点之后）；
                 None 表示放到第一个
             editor_id: 编辑者用户 ID（UUID 字符串）
@@ -348,12 +348,12 @@ class NodeService:
             node_id, new_parent_id, new_sort, editor_id=editor_id, editor_name=editor_name
         )
 
-    async def delete_node(self, node_id: int) -> bool:
+    async def delete_node(self, node_id: str) -> bool:
         """
         删除节点。
 
         参数:
-            node_id: 节点 ID
+            node_id: 节点 ID (UUID)
 
         返回:
             bool: 是否删除成功
@@ -380,7 +380,7 @@ class NodeService:
         
         return await self._node_port.delete_node(node_id)
 
-    async def get_application_detail_for_mcp(self, node_id: int) -> dict:
+    async def get_application_detail_for_mcp(self, node_id: str) -> dict:
         """
         获取应用详情供 MCP Server 使用（内部接口，无认证）。
 
@@ -388,7 +388,7 @@ class NodeService:
         - 背景 Context：入参节点的父节点链直至根节点，以及各自关联的文档内容（若有）。
 
         参数:
-            node_id: 节点 ID（URL 所代表的节点）
+            node_id: 节点 ID (UUID)（URL 所代表的节点）
 
         返回:
             dict: {"context": [...], "content_to_develop": [...]}

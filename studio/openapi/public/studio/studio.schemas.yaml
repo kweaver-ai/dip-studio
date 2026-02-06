@@ -107,17 +107,19 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
           title: 节点 ID
-          description: 节点主键 ID
+          description: 节点主键 ID (UUID v4)
         project_id:
           type: integer
           title: 项目 ID
           description: 所属项目 ID
         parent_id:
-          type: [integer, "null"]
+          type: [string, "null"]
+          format: uuid
           title: 父节点 ID
-          description: 父节点 ID，根节点为 null
+          description: 父节点 ID (UUID)，根节点为 null
         node_type:
           type: string
           title: 节点类型
@@ -138,7 +140,7 @@ components:
         path:
           type: string
           title: 节点路径
-          description: 节点路径，如 /node_1/node_3/node_8
+          description: 节点路径，如 /node_<uuid>
         sort:
           type: integer
           title: 排序值
@@ -176,13 +178,13 @@ components:
         - creator
         - editor
       example:
-        id: 1
+        id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
         project_id: 1
         parent_id: null
         node_type: "application"
         name: "智能运维应用"
         description: "主应用节点"
-        path: "/node_1"
+        path: "/node_a1b2c3d4-e5f6-7890-abcd-ef1234567890"
         sort: 0
         status: 1
         document_id: null
@@ -197,13 +199,15 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
           title: 节点 ID
         project_id:
           type: integer
           title: 项目 ID
         parent_id:
-          type: [integer, "null"]
+          type: [string, "null"]
+          format: uuid
           title: 父节点 ID
         node_type:
           type: string
@@ -293,9 +297,10 @@ components:
           type: integer
           title: 项目 ID
         parent_id:
-          type: integer
+          type: string
+          format: uuid
           title: 父节点 ID
-          description: 必须是应用节点 ID
+          description: 必须是应用节点 ID (UUID)
         name:
           type: string
           title: 节点名称
@@ -305,7 +310,7 @@ components:
           title: 节点描述
       example:
         project_id: 1
-        parent_id: 1
+        parent_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
         name: "故障分析页面"
         description: "故障分析功能页面"
 
@@ -322,9 +327,10 @@ components:
           type: integer
           title: 项目 ID
         parent_id:
-          type: integer
+          type: string
+          format: uuid
           title: 父节点 ID
-          description: 必须是页面节点 ID
+          description: 必须是页面节点 ID (UUID)
         name:
           type: string
           title: 节点名称
@@ -334,7 +340,7 @@ components:
           title: 节点描述
       example:
         project_id: 1
-        parent_id: 2
+        parent_id: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
         name: "日志分析功能"
         description: "分析系统日志的功能"
 
@@ -362,21 +368,24 @@ components:
         - node_id
       properties:
         node_id:
-          type: integer
+          type: string
+          format: uuid
           title: 节点 ID
-          description: 要移动的节点 ID
+          description: 要移动的节点 ID (UUID)
         new_parent_id:
-          type: [integer, "null"]
+          type: [string, "null"]
+          format: uuid
           title: 新父节点 ID
-          description: 新的父节点 ID
+          description: 新的父节点 ID (UUID)
         predecessor_node_id:
-          type: [integer, "null"]
+          type: [string, "null"]
+          format: uuid
           title: 前置节点 ID
           description: 新父节点下的直接子节点，移动后位于该节点之后；不传或 null 表示放到第一个
       example:
-        node_id: 3
-        new_parent_id: 2
-        predecessor_node_id: 5
+        node_id: "c3d4e5f6-a7b8-9012-cdef-345678901234"
+        new_parent_id: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+        predecessor_node_id: "d4e5f6a7-b8c9-0123-def0-456789012345"
 
     # ============ 词典 Schema ============
     DictionaryEntry:
@@ -584,9 +593,10 @@ components:
           title: 文档 ID
           description: 文档主键 ID
         function_node_id:
-          type: integer
+          type: string
+          format: uuid
           title: 功能节点 ID
-          description: 关联的功能节点 ID
+          description: 关联的功能节点 ID (UUID)
         creator:
           type: integer
           title: 创建者用户 ID
@@ -614,7 +624,7 @@ components:
         - blocks
       example:
         id: 1
-        function_node_id: 5
+        function_node_id: "e5f6a7b8-c9d0-1234-ef01-567890123456"
         creator: 100
         created_at: "2026-01-15T10:00:00Z"
         editor: 100

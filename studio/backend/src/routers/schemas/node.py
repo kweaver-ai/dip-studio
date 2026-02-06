@@ -20,7 +20,7 @@ class CreateApplicationNodeRequest(BaseModel):
 class CreatePageNodeRequest(BaseModel):
     """创建页面节点请求。"""
     project_id: int = Field(..., description="项目 ID")
-    parent_id: int = Field(..., description="父节点 ID（应用节点）")
+    parent_id: str = Field(..., description="父节点 ID（应用节点，UUID）")
     name: str = Field(..., description="节点名称", max_length=255)
     description: Optional[str] = Field(None, description="节点描述")
 
@@ -28,7 +28,7 @@ class CreatePageNodeRequest(BaseModel):
 class CreateFunctionNodeRequest(BaseModel):
     """创建功能节点请求。"""
     project_id: int = Field(..., description="项目 ID")
-    parent_id: int = Field(..., description="父节点 ID（页面节点）")
+    parent_id: str = Field(..., description="父节点 ID（页面节点，UUID）")
     name: str = Field(..., description="节点名称", max_length=255)
     description: Optional[str] = Field(None, description="节点描述")
 
@@ -41,9 +41,9 @@ class UpdateNodeRequest(BaseModel):
 
 class MoveNodeRequest(BaseModel):
     """移动节点请求。"""
-    node_id: int = Field(..., description="节点 ID")
-    new_parent_id: Optional[int] = Field(None, description="新父节点 ID")
-    predecessor_node_id: Optional[int] = Field(
+    node_id: str = Field(..., description="节点 ID (UUID)")
+    new_parent_id: Optional[str] = Field(None, description="新父节点 ID (UUID)")
+    predecessor_node_id: Optional[str] = Field(
         None,
         description="前置节点 ID（新父节点下的直接子节点，移动后位于该节点之后）；不传或 null 表示放到第一个",
     )
@@ -53,9 +53,9 @@ class MoveNodeRequest(BaseModel):
 
 class NodeResponse(BaseModel):
     """节点响应。"""
-    id: int = Field(..., description="节点 ID")
+    id: str = Field(..., description="节点 ID (UUID)")
     project_id: int = Field(..., description="项目 ID")
-    parent_id: Optional[int] = Field(None, description="父节点 ID")
+    parent_id: Optional[str] = Field(None, description="父节点 ID (UUID)")
     node_type: str = Field(..., description="节点类型：application/page/function")
     name: str = Field(..., description="节点名称")
     description: Optional[str] = Field(None, description="节点描述")
@@ -75,9 +75,9 @@ class NodeResponse(BaseModel):
 
 class NodeTreeResponse(BaseModel):
     """节点树响应（children 按 sort 顺序，响应中不包含 sort）。"""
-    id: int = Field(..., description="节点 ID")
+    id: str = Field(..., description="节点 ID (UUID)")
     project_id: int = Field(..., description="项目 ID")
-    parent_id: Optional[int] = Field(None, description="父节点 ID")
+    parent_id: Optional[str] = Field(None, description="父节点 ID (UUID)")
     node_type: str = Field(..., description="节点类型")
     name: str = Field(..., description="节点名称")
     description: Optional[str] = Field(None, description="节点描述")

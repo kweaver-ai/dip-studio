@@ -45,7 +45,7 @@ class DocumentAdapter(DocumentPort):
         """
         return FunctionDocument(
             id=row[0],
-            function_node_id=row[1],
+            function_node_id=str(row[1]) if row[1] is not None else "",
             creator_id=row[2] or "",
             creator_name=row[3] or "",
             created_at=row[4],
@@ -77,7 +77,7 @@ class DocumentAdapter(DocumentPort):
                     return None
                 return self._row_to_document(row)
 
-    async def get_document_by_node_id(self, function_node_id: int) -> Optional[FunctionDocument]:
+    async def get_document_by_node_id(self, function_node_id: str) -> Optional[FunctionDocument]:
         """根据功能节点 ID 获取文档。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
@@ -158,7 +158,7 @@ class DocumentAdapter(DocumentPort):
                 logger.info(f"删除文档成功: id={document_id}")
                 return True
 
-    async def delete_document_by_node_id(self, function_node_id: int) -> bool:
+    async def delete_document_by_node_id(self, function_node_id: str) -> bool:
         """根据功能节点 ID 删除文档。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:

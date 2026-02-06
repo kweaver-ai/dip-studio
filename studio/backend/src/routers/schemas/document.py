@@ -53,7 +53,7 @@ class PatchDocumentResponse(BaseModel):
 class FunctionDocumentResponse(BaseModel):
     """功能设计文档响应（含元信息，内部使用）。"""
     id: int = Field(..., description="文档 ID")
-    function_node_id: int = Field(..., description="功能节点 ID")
+    function_node_id: str = Field(..., description="功能节点 ID (UUID)")
     creator_id: str = Field("", description="创建者用户 ID（UUID）")
     creator_name: str = Field("", description="创建者用户显示名")
     created_at: Optional[datetime] = Field(None, description="创建时间")

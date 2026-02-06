@@ -283,11 +283,11 @@ paths:
       parameters:
         - in: path
           name: node_id
-          description: 节点 ID
+          description: 节点 ID (UUID)
           required: true
           schema:
-            type: integer
-            minimum: 1
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -323,11 +323,11 @@ paths:
       parameters:
         - in: path
           name: node_id
-          description: 节点 ID
+          description: 节点 ID (UUID)
           required: true
           schema:
-            type: integer
-            minimum: 1
+            type: string
+            format: uuid
       responses:
         "204":
           description: 删除成功

@@ -43,15 +43,15 @@ CREATE TABLE IF NOT EXISTS project (
     INDEX idx_editor_id (editor_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目表';
 
--- 节点表 (统一管理 application/page/function)
+-- 节点表 (统一管理 application/page/function)，节点 id 为 UUID v4
 CREATE TABLE IF NOT EXISTS project_node (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id CHAR(36) PRIMARY KEY COMMENT '节点 ID (UUID v4)',
     project_id BIGINT NOT NULL COMMENT '所属项目 ID',
-    parent_id BIGINT DEFAULT NULL COMMENT '父节点 ID',
+    parent_id CHAR(36) DEFAULT NULL COMMENT '父节点 ID (UUID)',
     node_type VARCHAR(32) NOT NULL COMMENT '节点类型：application/page/function',
     name VARCHAR(255) NOT NULL COMMENT '节点名称',
     description TEXT COMMENT '节点描述',
-    path VARCHAR(1024) NOT NULL COMMENT '节点路径，如 /node_1/node_3/node_8',
+    path VARCHAR(1024) NOT NULL COMMENT '节点路径，如 /node_<uuid>',
     sort INT DEFAULT 0 COMMENT '同级排序',
     status TINYINT DEFAULT 1 COMMENT '节点状态',
     document_id BIGINT DEFAULT NULL COMMENT '功能节点关联的文档 ID',
@@ -79,7 +79,7 @@ CREATE TABLE IF NOT EXISTS node_type (
 -- 功能设计文档表
 CREATE TABLE IF NOT EXISTS function_document (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    function_node_id BIGINT UNIQUE NOT NULL COMMENT '关联的功能节点 ID',
+    function_node_id CHAR(36) UNIQUE NOT NULL COMMENT '关联的功能节点 ID (UUID)',
     creator_id CHAR(36) DEFAULT NULL COMMENT '创建者用户ID(UUID)',
     creator_name VARCHAR(128) DEFAULT NULL COMMENT '创建者用户显示名',
     created_at DATETIME COMMENT '创建时间',

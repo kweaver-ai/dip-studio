@@ -62,13 +62,13 @@ class ProjectNode:
     统一管理 application/page/function 节点。
 
     属性:
-        id: 节点主键 ID
+        id: 节点主键 ID (UUID v4 字符串)
         project_id: 所属项目 ID
-        parent_id: 父节点 ID（根节点为 None）
+        parent_id: 父节点 ID（根节点为 None，UUID 字符串）
         node_type: 节点类型
         name: 节点名称
         description: 节点描述
-        path: 节点路径，如 /node_1/node_3/node_8
+        path: 节点路径，如 /node_<uuid>
         sort: 同级排序
         status: 节点状态
         document_id: 功能节点关联的文档 ID（仅 node_type=function 时有值）
@@ -80,11 +80,11 @@ class ProjectNode:
         edited_at: 最近编辑时间
         children: 子节点列表（用于树结构）
     """
-    id: int
+    id: str
     project_id: int
     node_type: NodeType
     name: str
-    parent_id: Optional[int] = None
+    parent_id: Optional[str] = None
     description: Optional[str] = None
     path: str = ""
     sort: int = 0

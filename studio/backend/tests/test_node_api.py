@@ -30,6 +30,7 @@ async def test_create_application_node(client: AsyncClient):
     
     assert response.status_code == 201
     data = response.json()
+    assert isinstance(data["id"], str) and len(data["id"]) == 36, "节点 ID 应为 UUID 字符串"
     assert data["name"] == "测试应用"
     assert data["node_type"] == "application"
     assert data["parent_id"] is None

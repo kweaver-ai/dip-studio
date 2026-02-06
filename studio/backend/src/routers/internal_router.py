@@ -35,7 +35,7 @@ def create_internal_router(node_service: NodeService) -> APIRouter:
         },
     )
     async def get_application_detail(
-        node_id: int = Path(..., description="节点 ID（URL 所代表的节点）", ge=1),
+        node_id: str = Path(..., description="节点 ID (UUID)（URL 所代表的节点）"),
     ) -> dict:
         """供 MCP Server 获取应用详情。"""
         try:

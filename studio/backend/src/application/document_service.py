@@ -70,14 +70,14 @@ class DocumentService:
 
     async def get_document_by_node_id(
         self,
-        function_node_id: int,
+        function_node_id: str,
         include_blocks: bool = True,
     ) -> Optional[FunctionDocument]:
         """
         根据功能节点 ID 获取文档。
 
         参数:
-            function_node_id: 功能节点 ID
+            function_node_id: 功能节点 ID (UUID)
             include_blocks: 是否包含文档块
 
         返回:
@@ -179,7 +179,7 @@ class DocumentService:
 
     async def init_document(
         self,
-        function_node_id: int,
+        function_node_id: str,
         creator_id: str = "",
         creator_name: str = "",
     ) -> tuple[int, FunctionDocument]:
@@ -188,7 +188,7 @@ class DocumentService:
         若该功能节点已有文档则返回该文档；否则创建新文档并回写 document_id 到节点。
 
         参数:
-            function_node_id: 功能节点 ID
+            function_node_id: 功能节点 ID (UUID)
             creator_id: 创建者用户 ID（UUID 字符串）
             creator_name: 创建者用户显示名
 

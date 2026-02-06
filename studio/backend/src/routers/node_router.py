@@ -233,7 +233,7 @@ def create_node_router(node_service: NodeService) -> APIRouter:
     )
     async def update_node(
         request: UpdateNodeRequest,
-        node_id: int = Path(..., description="节点 ID", ge=1),
+        node_id: str = Path(..., description="节点 ID (UUID)"),
     ) -> NodeResponse:
         """更新节点。"""
         try:
@@ -270,7 +270,7 @@ def create_node_router(node_service: NodeService) -> APIRouter:
         }
     )
     async def delete_node(
-        node_id: int = Path(..., description="节点 ID", ge=1),
+        node_id: str = Path(..., description="节点 ID (UUID)"),
     ) -> Response:
         """删除节点。"""
         try:

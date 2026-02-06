@@ -126,7 +126,7 @@ class FunctionDocument:
 
     属性:
         id: 文档主键 ID
-        function_node_id: 关联的功能节点 ID
+        function_node_id: 关联的功能节点 ID (UUID 字符串)
         creator_id: 创建者用户 ID（UUID 字符串）
         creator_name: 创建者用户显示名
         created_at: 创建时间
@@ -136,7 +136,7 @@ class FunctionDocument:
         blocks: 文档块列表（查询时填充）
     """
     id: int
-    function_node_id: int
+    function_node_id: str
     creator_id: str = ""
     creator_name: str = ""
     created_at: Optional[datetime] = None

@@ -110,12 +110,12 @@ class DocumentPort(ABC):
         pass
 
     @abstractmethod
-    async def get_document_by_node_id(self, function_node_id: int) -> Optional[FunctionDocument]:
+    async def get_document_by_node_id(self, function_node_id: str) -> Optional[FunctionDocument]:
         """
         根据功能节点 ID 获取文档。
 
         参数:
-            function_node_id: 功能节点 ID
+            function_node_id: 功能节点 ID (UUID)
 
         返回:
             Optional[FunctionDocument]: 文档实体，不存在时返回 None
@@ -168,12 +168,12 @@ class DocumentPort(ABC):
         pass
 
     @abstractmethod
-    async def delete_document_by_node_id(self, function_node_id: int) -> bool:
+    async def delete_document_by_node_id(self, function_node_id: str) -> bool:
         """
         根据功能节点 ID 删除文档。
 
         参数:
-            function_node_id: 功能节点 ID
+            function_node_id: 功能节点 ID (UUID)
 
         返回:
             bool: 是否删除成功
