@@ -10,7 +10,6 @@ services:
       - "8001:8001"
     volumes:
       # Mount data directories for easy updates
-      - ./requirements:/app/requirements:ro
       - ./api-specs:/app/api-specs:ro
       # Mount config for easy updates
       - ./config.yaml:/app/config.yaml:ro

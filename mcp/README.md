@@ -1,15 +1,12 @@
 # DIP Studio MCP Server
 
-DIP Studio MCP Server 是一个基于 Model Context Protocol (MCP) 的远程服务器，用于读取本地需求文档并为 Cursor 或 Claude Code 提供自动代码生成能力，支持 DIP 应用开发流程。
+DIP Studio MCP Server 是基于 Model Context Protocol (MCP) 的远程服务，为 Cursor、Claude Code 等客户端提供 **DIP Studio 项目上下文** 与 **OpenAPI 接口规范** 能力，支持 DIP 应用开发与代码生成。
 
 ## 功能特性
 
-- 📄 **多格式文档支持**: 支持读取 PDF、Markdown、Word、TXT 等格式的需求文档
-- 📋 **OpenAPI 接口规范**: 支持读取和解析 OpenAPI 3.0.2 规范的接口文档，提供接口定义和端点信息
-- 🤖 **智能代码生成**: 基于需求文档和任务描述，使用 LLM 自动生成代码
-- 🔧 **Buildkit 集成**: 与 DIP buildkit 工具集成，支持应用转换和打包流程
-- 🌐 **远程访问**: 支持通过 HTTP 协议远程访问
-- 🔌 **MCP 协议**: 完全兼容 MCP 标准，可与 Cursor、Claude Code 等客户端集成
+- **get_context**: 根据 DIP Studio 节点 ID 从后端获取该节点的完整设计文档与上下文，返回结构化 `context`、`content_to_develop` 及模版化文档 `template_content`，供 Coding Agent 优先使用
+- **OpenAPI 工具**: 从 `api-specs` 目录加载 OpenAPI 规范，提供 `list_all_api_endpoints`、`get_api_code_example` 等工具，便于生成接口调用代码
+- **远程访问**: 支持 HTTP（含 Streamable HTTP）传输，可与 Cursor、Claude Code 等 MCP 客户端集成
 
 ## 安装
 
@@ -20,12 +17,14 @@ DIP Studio MCP Server 是一个基于 Model Context Protocol (MCP) 的远程服�
 
 ### 安装步骤
 
-1. 克隆或进入项目目录：
+1. 进入项目目录：
+
 ```bash
 cd mcp
 ```
 
 2. 创建虚拟环境（推荐）：
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # Linux/macOS
@@ -34,11 +33,13 @@ venv\Scripts\activate  # Windows
 ```
 
 3. 安装依赖：
+
 ```bash
 pip install -r requirements.txt
 ```
 
-4. 安装 MCP SDK（如果尚未安装）：
+4. 安装 MCP SDK（若尚未安装）：
+
 ```bash
 pip install mcp
 ```
@@ -47,216 +48,112 @@ pip install mcp
 
 ### 1. 配置文件
 
-编辑 `config.yaml` 文件：
+编辑 `config.yaml`：
 
 ```yaml
 server:
   host: "0.0.0.0"
-  port: 8001  # 如果端口被占用，可以修改为其他端口
-  transport: "http"
+  port: 8001
+  transport: "streamable-http"   # 或 "http" 兼容旧版 SSE
 
-documents:
-  base_path: "./requirements"  # 需求文档存储路径
-  supported_formats: [".pdf", ".md", ".docx", ".txt"]
+studio:
+  base_url: "http://localhost:8000"   # get_context 调用的 Studio 内部接口地址
 
 api_specs:
-  base_path: "./api-specs"  # OpenAPI 接口规范文档存储路径
-
-llm:
-  provider: "openai"  # 或 "anthropic"
-  api_key: "${LLM_API_KEY}"  # 从环境变量读取
-  model: "gpt-4"
-  temperature: 0.7
-
-buildkit:
-  path: "../buildkit"  # buildkit 目录路径
+  base_path: "./api-specs"   # OpenAPI 规范文档目录
 ```
 
 ### 2. 环境变量
 
-设置 LLM API 密钥：
+- **STUDIO_BASE_URL**（可选）: 覆盖 `config.yaml` 中的 `studio.base_url`，用于 get_context 请求 Studio 的地址（如 K8s 内：`http://dip-studio:8000`）
 
-```bash
-# OpenAI
-export OPENAI_API_KEY="your-api-key-here"
+### 3. API 规范目录
 
-# 或 Anthropic
-export ANTHROPIC_API_KEY="your-api-key-here"
-
-# 或使用通用变量（如果 config.yaml 中配置了）
-export LLM_API_KEY="your-api-key-here"
-```
-
-### 3. 需求文档目录
-
-在 `mcp` 目录下创建 `requirements` 目录，并将需求文档放入其中：
-
-```bash
-mkdir -p requirements
-# 将你的需求文档（PDF、Markdown 等）放入此目录
-```
-
-### 4. API 规范文档目录
-
-在 `mcp` 目录下创建 `api-specs` 目录，并将 OpenAPI 规范文档（JSON 格式）放入其中：
+将 OpenAPI 规范文件（JSON 或 YAML）放入 `api-specs` 目录，服务会自动扫描并加载：
 
 ```bash
 mkdir -p api-specs
-# 将 OpenAPI 3.0.2 规范的 JSON 文件放入此目录
-# 例如：ontology-manager-action-type.json, ontology-query.json 等
+# 将 OpenAPI 3.x 规范放入此目录
 ```
-
-**注意**: 服务器会自动扫描 `api-specs` 目录下的所有 `.json` 文件作为 OpenAPI 规范文档。
 
 ## 快速开始
 
-### 1. 启动服务器
+### 1. 启动服务
 
-详细启动说明请参考 [MCP_SERVER_START.md](./MCP_SERVER_START.md)
+详见 [MCP_SERVER_START.md](./MCP_SERVER_START.md)。
 
-**快速启动**:
+快速启动：
+
 ```bash
 cd mcp
 python -m src.server
 ```
 
-服务器默认在 `http://0.0.0.0:8001` 启动，MCP 端点为 `http://localhost:8001/mcp`。
+默认监听 `http://0.0.0.0:8001`，MCP 端点为 `http://localhost:8001/dip-studio/mcp`。
 
 ### 2. 配置客户端
 
-详细配置说明请参考 [MCP_CLIENT_CONFIG.md](./MCP_CLIENT_CONFIG.md)
+详见 [MCP_CLIENT_CONFIG.md](./MCP_CLIENT_CONFIG.md)。
 
-**Cursor 快速配置**:
-在项目根目录创建 `.cursor/mcp.json`:
+Cursor 快速配置：在项目根目录创建 `.cursor/mcp.json`：
+
 ```json
 {
   "mcpServers": {
     "dip-studio": {
-      "url": "http://localhost:8001/mcp"
+      "url": "http://localhost:8001/dip-studio/mcp"
     }
   }
 }
 ```
 
-**重要**: 
-- 服务器不要求认证，客户端可以直接连接
-- 确保服务器已启动后再配置客户端
-- 详细配置和故障排除请参考 [MCP_CLIENT_CONFIG.md](./MCP_CLIENT_CONFIG.md)
-
 ## 文档导航
 
-- **[MCP_SERVER_START.md](./MCP_SERVER_START.md)** - 服务器启动详细指南
-- **[MCP_CLIENT_CONFIG.md](./MCP_CLIENT_CONFIG.md)** - 客户端配置使用指南
-- **[DOCKER.md](./DOCKER.md)** - Docker 部署指南
-- **[CURSOR_SETUP.md](./CURSOR_SETUP.md)** - Cursor 详细配置说明
-- **[QUICKSTART.md](./QUICKSTART.md)** - 快速开始指南
+- **[MCP_SERVER_START.md](./MCP_SERVER_START.md)** - 服务启动说明
+- **[MCP_CLIENT_CONFIG.md](./MCP_CLIENT_CONFIG.md)** - 客户端配置
+- **[DOCKER.md](./DOCKER.md)** - Docker 部署
+- **[CURSOR_SETUP.md](./CURSOR_SETUP.md)** - Cursor 配置
+- **[QUICKSTART.md](./QUICKSTART.md)** - 快速开始
+- **[PROMPT_EXAMPLE.md](./PROMPT_EXAMPLE.md)** - Coding Agent 提示词示例
 
 ## MCP Tools
 
-服务器提供以下工具（Tools）：
+### 1. `get_context`
 
-### 需求文档工具
+根据 DIP Studio 节点 ID 获取该节点的完整设计文档与上下文，供 Coding Agent 在回答前**必须先调用一次**。
 
-#### 1. `list_requirements`
+- **参数**: `node_id` (string, 必需) — 当前 DIP Studio 节点的 UUID，例如 `932dba6a-0640-42fe-b108-00ec94110ff0`
+- **返回** (JSON 字符串):
+  - `context`: 祖先节点及其文档与可读文本（背景）
+  - `content_to_develop`: 当前节点及后代节点及各自文档与可读文本（待开发内容）
+  - `template_content`: 完整 AI 应用设计与开发规范模版（应用名称、应用描述、术语表、导航、应用设计、开发规范等）
 
-列出所有可用的需求文档。
+**依赖**: 需配置 `studio.base_url`（或环境变量 `STUDIO_BASE_URL`），且 Studio 内部接口 `/internal/api/dip-studio/v1/nodes/{node_id}/application-detail` 可访问。
 
-**参数**: 无
+### 2. `list_all_api_endpoints`
 
-**返回**: 文档列表和元数据
+列出所有已加载 OpenAPI 规范中的端点详情，适用于代码生成。
 
-#### 2. `read_requirement`
+- **参数**: 无
+- **返回**: 规范元数据、端点列表（路径、方法、参数、请求体、响应 schema、示例等）及集成信息
 
-读取指定的需求文档。
+### 3. `get_api_code_example`
 
-**参数**:
-- `doc_id` (string, 必需): 文档 ID（文件名不含扩展名）
+获取指定 API 端点的代码示例。
 
-**返回**: 文档内容和元数据
-
-### API 接口工具
-
-#### 3. `list_all_api_endpoints`
-
-列出所有 API 端点详情，优化用于代码生成。
-
-**参数**: 无
-
-**返回**: 完整的 API 规范信息，包括：
-- API 规范元数据（标题、版本、base URL、认证方式）
-- 端点详情（路径、方法、参数类型、示例值、请求体、响应 schema）
-- 集成信息（认证方式、内容类型）
-
-**特点**: 
-- 包含完整的类型信息，便于生成类型安全的代码
-- 提供示例值，便于理解和使用
-- 结构化数据，便于 AI 理解和处理
-
-#### 4. `get_api_code_example`
-
-获取特定 API 端点的代码示例。
-
-**参数**:
-- `spec_id` (string, 必需): API 规范 ID
-- `path` (string, 必需): 端点路径（如 `/api/users/{id}`）
-- `method` (string, 必需): HTTP 方法（GET, POST, PUT, DELETE, PATCH 等）
-- `language` (string, 可选): 目标语言（typescript, python, javascript，默认: typescript）
-
-**返回**: 完整的代码示例，包括：
-- 可直接使用的函数代码
-- 导入语句
-- 错误处理
-- 使用示例
-- 集成配置信息
-
-**示例**: 
-- `get_api_code_example("agent-factory", "/agent-factory/v3/agent", "POST", "typescript")`
-- `get_api_code_example("agent-app", "/api/agent-app/v1/app/{app_key}/chat/completion", "POST", "python")`
+- **参数**:
+  - `spec_id` (string, 必需): 规范 ID
+  - `path` (string, 必需): 端点路径，如 `/api/users/{id}`
+  - `method` (string, 必需): HTTP 方法（GET、POST、PUT、DELETE、PATCH 等）
+  - `language` (string, 可选): 目标语言，默认 `typescript`，可选 `python`、`javascript`
+- **返回**: 代码示例、集成信息及使用说明
 
 ## MCP Resources
 
-服务器提供以下资源（Resources）：
-
-### 需求文档资源
-
-#### 1. `requirement://{doc_id}`
-
-访问特定的需求文档内容。
-
-**示例**: `requirement://example`
-
-### OpenAPI 接口规范资源
-
-#### 2. `api-spec://{spec_id}`
-
-访问完整的 OpenAPI 规范文档。
-
-**示例**: 
-- `api-spec://ontology-manager-action-type`
-- `api-spec://ontology-manager-network`
-- `api-spec://ontology-manager-object-type`
-- `api-spec://ontology-manager-relation-type`
-- `api-spec://ontology-query`
-
-#### 3. `api-spec://{spec_id}/summary`
-
-访问 OpenAPI 规范的摘要信息（包含端点列表和统计信息）。
-
-**示例**: `api-spec://ontology-query/summary`
-
-### API 集成资源
-
-#### 4. `api-integration://{spec_id}/{language}`
-
-访问 API 集成指南，包含特定语言的集成说明和示例。
-
-**示例**: 
-- `api-integration://agent-factory/typescript`
-- `api-integration://agent-app/python`
-
-#### 5. `api-example://{spec_id}`
-
-访问 API 端点示例列表。
+- **api-spec://{spec_id}** — 完整 OpenAPI 规范文档
+- **api-spec://{spec_id}/summary** — 规范摘要（端点列表与统计）
+- **api-integration://{spec_id}/{language}** — 指定语言的集成指南
+- **api-example://{spec_id}** — 该规范下的端点示例列表
 
 ## 项目结构
 
@@ -264,80 +161,48 @@ python -m src.server
 mcp/
 ├── src/
 │   ├── __init__.py
-│   ├── server.py              # MCP 服务器主入口
-│   ├── document_loader.py     # 文档加载和解析模块
-│   └── openapi_loader.py      # OpenAPI 规范加载和解析模块
-├── requirements.txt            # Python 依赖
-├── config.yaml                 # 服务器配置
-├── Dockerfile                  # Docker 镜像构建文件
-├── docker-compose.yml         # Docker Compose 配置
-├── Makefile                   # 便捷命令脚本
-├── README.md                  # 项目总览
-├── MCP_SERVER_START.md        # 服务器启动指南
-├── MCP_CLIENT_CONFIG.md       # 客户端配置指南
-├── DOCKER.md                  # Docker 部署指南
-├── CURSOR_SETUP.md            # Cursor 详细配置
-├── QUICKSTART.md              # 快速开始指南
-├── requirements/              # 需求文档目录
-└── api-specs/                 # OpenAPI 规范文档目录
+│   ├── server.py           # MCP 服务主入口
+│   └── openapi_loader.py   # OpenAPI 规范加载与解析
+├── api-specs/              # OpenAPI 规范文档目录
+├── config.yaml             # 服务配置
+├── requirements.txt        # Python 依赖
+├── Dockerfile
+├── docker-compose.yml
+├── Makefile
+├── README.md
+├── MCP_SERVER_START.md
+├── MCP_CLIENT_CONFIG.md
+├── DOCKER.md
+├── CURSOR_SETUP.md
+├── QUICKSTART.md
+├── PROMPT_EXAMPLE.md
+└── dip-studio-mcp-chart/   # Helm 部署
 ```
-
-## 开发
-
-### 添加新的文档格式支持
-
-编辑 `src/document_loader.py`，在 `_parse_document` 方法中添加新的格式处理逻辑。
-
-### 扩展 OpenAPI 支持
-
-编辑 `src/openapi_loader.py`，可以：
-- 添加新的代码生成语言支持
-- 自定义代码示例模板
-- 扩展端点信息提取逻辑
 
 ## 故障排除
 
-### 问题: MCP SDK 未找到
+### MCP SDK 未找到
 
-**解决方案**: 
 ```bash
 pip install mcp
 ```
 
-### 问题: 文档无法读取
+### get_context 请求失败
 
-**检查**:
-1. 确认 `requirements` 目录存在
-2. 确认文档格式在 `supported_formats` 列表中
-3. 检查文档文件权限
+1. 确认 `config.yaml` 中 `studio.base_url` 正确，或设置环境变量 `STUDIO_BASE_URL`
+2. 确认 Studio 服务已启动且内部接口可访问（同网络或 K8s 内）
+3. 确认传入的 `node_id` 为有效 UUID v4 格式
 
-### 问题: API 规范无法加载
+### API 规范无法加载
 
-**检查**:
-1. 确认 `api-specs` 目录存在
-2. 确认文件格式正确（JSON 或 YAML）
-3. 检查文件是否为有效的 OpenAPI 3.0.2 规范
-4. 查看服务器日志中的错误信息
+1. 确认 `api-specs` 目录存在且包含有效 OpenAPI 3.x 文件（JSON/YAML）
+2. 查看服务日志中的加载错误信息
 
 ## 日志
 
-服务器日志会输出到标准输出，包含以下信息：
-- 服务器启动和初始化状态
-- 工具调用记录
-- 错误和警告信息
-
-日志级别可通过环境变量 `LOG_LEVEL` 控制（DEBUG, INFO, WARNING, ERROR）。
-
-## 许可证
-
-本项目遵循与 DIP Studio 项目相同的许可证。
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request！
+日志输出到标准输出，可通过环境变量 `LOG_LEVEL` 控制级别（DEBUG、INFO、WARNING、ERROR）。
 
 ## 相关链接
 
-- [Model Context Protocol 文档](https://modelcontextprotocol.io)
+- [Model Context Protocol](https://modelcontextprotocol.io)
 - [DIP Studio 项目](../README.md)
-- [Buildkit 文档](../buildkit/README.md)
