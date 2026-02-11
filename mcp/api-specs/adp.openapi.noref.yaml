@@ -1,0 +1,493 @@
+openapi: 3.0.1
+
+info:
+  title: ADP Open API Specification (No-$ref Version)
+  version: 1.0.0
+  description: >
+    将原有多文件的 ADP OpenAPI 规范合并为一个不包含 $ref 的简化版本。
+    为了避免递归 schema 无限展开，下面的请求体和返回体 schema 统一使用泛型结构（type: object 或数组），
+    但接口路径、参数及说明是完整的。
+
+servers:
+  - url: /api
+
+tags:
+  - name: 数据模型查询
+    description: 指标模型及指标数据查询相关接口
+  - name: 本体查询
+    description: 知识网络对象、行动及子图查询接口
+
+paths:
+  /mdl-uniquery/v1/metric-model:
+    summary: 基于指标模型的数据预览
+    post:
+      tags:
+        - 数据模型查询
+      summary: metric-model
+      description: 基于指标模型的数据预览
+      parameters:
+        - name: X-HTTP-Method-Override
+          in: header
+          required: true
+          description: 重载 POST，实际上是 GET 方法
+          schema:
+            type: string
+            enum: [GET]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: ReqMetricModelSimulate 请求体（原 schema 结构已省略）
+      responses:
+        '200':
+          description: MetricResultsSimulate 响应体（原 schema 结构已省略）
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: 参数错误（400BadRequest）
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: 内部错误（500InternalError）
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /mdl-uniquery/v1/metric-models/{ids}:
+    post:
+      tags:
+        - 数据模型查询
+      summary: metric-models/{ids}
+      description: >
+        根据指标模型 id 查询指标数据。可支持单个指标查询和多个指标查询。
+        若需要查询多个模型的数据，请提交查询请求参数数组，请求参数与模型 id 顺序一一对应。
+      parameters:
+        - name: ids
+          in: path
+          required: true
+          description: 指标模型 id，支持单个或多个
+          schema:
+            type: string
+        - name: ignoring_store_cache
+          in: query
+          required: false
+          description: 是否查询持久化缓存下来的数据。默认为 false，不忽略
+          schema:
+            type: boolean
+        - name: include_model
+          in: query
+          description: 是否返回指标模型信息。默认为 false
+          schema:
+            type: boolean
+        - name: filter_mode
+          in: query
+          description: 过滤模式
+          schema:
+            type: string
+            enum: [normal, error, ignore]
+        - name: fill_null
+          in: query
+          description: 是否补空，默认为 true，即补 null
+          schema:
+            type: boolean
+        - name: ignoring_memory_cache
+          in: query
+          description: 是否忽略内存缓存数据，默认为 false，不忽略
+          schema:
+            type: boolean
+        - name: ignoring_hcts
+          in: query
+          description: 是否忽略高基查询，默认为 false，不忽略
+          schema:
+            type: boolean
+        - name: X-HTTP-Method-Override
+          in: header
+          required: true
+          description: 重载 POST，实际上是 GET 方法
+          schema:
+            type: string
+            enum: [GET]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: ReqMetricModel 请求体（原 schema 结构已省略）
+      responses:
+        '200':
+          description: MetricResults 响应体（原 schema 结构已省略）
+          content:
+            application/json:
+              schema:
+                type: object
+        '207':
+          description: 部分成功
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: 资源不存在
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /mdl-uniquery/v1/metric-model-groups/{group_name}/metric-models:
+    post:
+      tags:
+        - 数据模型查询
+      summary: metric-model-groups/{group_name}/metric-models
+      description: 根据分组名称和指标模型名称查询指标数据（以数组形式接受请求体参数）
+      parameters:
+        - name: group_name
+          in: path
+          required: true
+          description: 分组名称
+          schema:
+            type: string
+        - name: ignoring_store_cache
+          in: query
+          description: 是否查询持久化缓存下来的数据。默认为 false，不忽略
+          schema:
+            type: boolean
+        - name: include_model
+          in: query
+          description: 是否返回指标模型信息。默认为 false
+          schema:
+            type: boolean
+        - name: ignoring_memory_cache
+          in: query
+          description: 是否忽略内存缓存数据，默认为 false，不忽略
+          schema:
+            type: boolean
+        - name: ignoring_hcts
+          in: query
+          description: 是否忽略高基查询，默认为 false，不忽略
+          schema:
+            type: boolean
+        - name: filter_mode
+          in: query
+          description: 过滤模式。默认为 normal
+          schema:
+            type: string
+            enum: [normal, error, ignore]
+        - name: fill_null
+          in: query
+          description: 是否补空，默认为 true，即补 null
+          schema:
+            type: boolean
+        - name: X-HTTP-Method-Override
+          in: header
+          required: true
+          description: 重载 POST，实际上是 GET 方法
+          schema:
+            type: string
+            enum: [GET]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              description: ReqMetricModelForGroup 数组（原 schema 结构已省略）
+              items:
+                type: object
+      responses:
+        '200':
+          description: 查询成功（MetricResults，原 schema 结构已省略）
+          content:
+            application/json:
+              schema:
+                type: object
+        '207':
+          description: 部分成功
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: 资源不存在
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /mdl-uniquery/v1/metric-models/{id}/fields:
+    summary: 基于指标模型 id 获取字段列表
+    get:
+      tags:
+        - 数据模型查询
+      summary: 基于指标模型 id 获取字段列表
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 指标模型 id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /mdl-uniquery/v1/metric-models/{id}/field_values/{field_name}:
+    summary: 基于指标模型 id 获取字段的值列表
+    get:
+      tags:
+        - 数据模型查询
+      summary: 基于指标模型 id 获取字段的值列表
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 指标模型 id
+          schema:
+            type: string
+        - name: field_name
+          in: path
+          required: true
+          description: 字段名称
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                description: FieldValues（原 schema 结构已省略）
+
+  /mdl-uniquery/v1/metric-models/{id}/labels:
+    summary: 基于指标模型 id 获取维度字段列表
+    get:
+      tags:
+        - 数据模型查询
+      summary: 基于指标模型 id 获取维度字段列表
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 指标模型 id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /ontology-query/v1/knowledge-networks/{kn_id}/object-types/{ot_id}:
+    summary: 检索指定对象类的对象的详细数据
+    post:
+      tags:
+        - 本体查询
+      operationId: getObjectDetail
+      summary: 检索指定对象类的对象的详细数据
+      parameters:
+        - name: kn_id
+          in: path
+          required: true
+          description: 业务知识网络 ID
+          schema:
+            type: string
+        - name: ot_id
+          in: path
+          required: true
+          description: 对象类 ID
+          schema:
+            type: string
+        - name: include_type_info
+          in: query
+          description: 是否包含对象类信息，默认 false，不包含
+          schema:
+            type: boolean
+        - name: include_logic_params
+          in: query
+          description: 包含逻辑属性的计算参数，默认 false，返回结果不包含逻辑属性字段和值
+          schema:
+            type: boolean
+        - name: X-HTTP-Method-Override
+          in: header
+          required: true
+          description: 重载 POST，实际上是 GET 方法
+          schema:
+            type: string
+            enum: [GET]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: FirstQueryWithSearchAfter 或 PageTurnQueryWithSearchAfter（原 schema 结构已省略）
+      responses:
+        '200':
+          description: ok（ObjectDataResponse，原 schema 结构已省略）
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /ontology-query/v1/knowledge-networks/{kn_id}/action-types/{at_id}/:
+    summary: 行动查询
+    description: 获取相关行动的具体行动详情，可支持获取多个对象的行动详情
+    post:
+      tags:
+        - 本体查询
+      operationId: getActionDetail
+      summary: 行动查询
+      parameters:
+        - name: kn_id
+          in: path
+          required: true
+          description: 业务知识网络 ID
+          schema:
+            type: string
+        - name: at_id
+          in: path
+          required: true
+          description: 行动类 ID
+          schema:
+            type: string
+        - name: include_type_info
+          in: query
+          description: 是否包含行动类信息，默认 false，不包含
+          schema:
+            type: boolean
+        - name: x-http-method-override
+          in: header
+          required: true
+          description: 重载 POST
+          schema:
+            type: string
+            enum: [GET]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: UniqueIdentities 请求体（原 schema 结构已省略）
+      responses:
+        '200':
+          description: ok（Actions，原 schema 结构已省略）
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /ontology-query/v1/knowledge-networks/{kn_id}/subgraph:
+    summary: 获取对象子图
+    post:
+      tags:
+        - 本体查询
+      operationId: getObjectSubGraph
+      summary: 子图查询
+      description: >
+        子图查询，可以是基于起点、方向和路径长度获取对象子图，
+        也可以是基于路径获取对象子图，查询请求方式和返回体不同。
+      parameters:
+        - name: kn_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: include_logic_params
+          in: query
+          description: 包含逻辑属性的计算参数，默认 false，返回结果不包含逻辑属性字段和值
+          schema:
+            type: boolean
+        - name: query_type
+          in: query
+          required: false
+          description: >
+            查询类型，默认是子图探索；若为 relation_path，则表示基于路径获取对象子图
+          schema:
+            type: string
+            enum: ["", relation_path]
+        - name: x-http-method-override
+          in: header
+          required: true
+          description: 重载请求头
+          schema:
+            type: string
+            enum: [GET]
+      requestBody:
+        required: true
+        description: 子图查询请求体
+        content:
+          application/json:
+            schema:
+              type: object
+              description: SubGraphQueryBaseOnSource 或 SubGraphQueryBaseOnTypePath（原 schema 结构已省略）
+      responses:
+        '200':
+          description: 对象子图（ObjectSubGraphResponse 或 PathEntries，原 schema 结构已省略）
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /ontology-query/v1/knowledge-networks/{kn_id}/object-types/{ot_id}/properties:
+    post:
+      tags:
+        - 本体查询
+      operationId: getObjectProperties
+      summary: 对象属性值查询
+      parameters:
+        - name: kn_id
+          in: path
+          required: true
+          description: 业务知识网络 ID
+          schema:
+            type: string
+        - name: ot_id
+          in: path
+          required: true
+          description: 对象类 ID
+          schema:
+            type: string
+        - name: x-http-method-override
+          in: header
+          required: true
+          description: 重载 POST，实际上是 GET 方法
+          schema:
+            type: string
+            enum: [GET]
+      requestBody:
+        required: true
+        description: 属性查询请求体
+        content:
+          application/json:
+            schema:
+              type: object
+              description: PropertyQueryBody 请求体（原 schema 结构已省略）
+      responses:
+        '200':
+          description: ok（ObjectPropertiesValuesResponse，原 schema 结构已省略）
+          content:
+            application/json:
+              schema:
+                type: object
+
+components: {}
+
