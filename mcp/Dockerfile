@@ -45,10 +45,9 @@ COPY config.yaml ./
 COPY requirements.txt ./
 
 # Create data directories
-RUN mkdir -p requirements api-specs
+RUN mkdir -p api-specs
 
 # Copy data files (will be empty if directories don't exist)
-COPY requirements/ ./requirements/
 COPY api-specs/ ./api-specs/
 
 # Expose the MCP server port (default: 8001)
