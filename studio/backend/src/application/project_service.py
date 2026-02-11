@@ -8,6 +8,7 @@ from typing import List, Optional
 
 from src.domains.project import Project
 from src.domains.node import NodeType
+from src.infrastructure.context import get_user_id
 from src.ports.project_port import ProjectPort
 from src.ports.node_port import NodePort
 from src.ports.dictionary_port import DictionaryPort
@@ -56,12 +57,15 @@ class ProjectService:
 
     async def get_all_projects(self) -> List[Project]:
         """
-        获取所有项目列表。
+        获取当前用户创建的项目列表。
+
+        从上下文中取当前用户 ID，仅返回创建人为当前用户的项目。
 
         返回:
             List[Project]: 项目列表
         """
-        return await self._project_port.get_all_projects()
+        creator_id = get_user_id()
+        return await self._project_port.get_all_projects(creator_id=creator_id)
 
     async def get_project_by_id(self, project_id: int) -> Project:
         """

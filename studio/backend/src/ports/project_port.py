@@ -18,9 +18,12 @@ class ProjectPort(ABC):
     """
 
     @abstractmethod
-    async def get_all_projects(self) -> List[Project]:
+    async def get_all_projects(self, creator_id: Optional[str] = None) -> List[Project]:
         """
-        获取所有项目列表。
+        获取项目列表。
+
+        参数:
+            creator_id: 创建人用户 ID，传入时仅返回该创建人的项目；不传则返回全部（兼容旧调用）。
 
         返回:
             List[Project]: 项目列表

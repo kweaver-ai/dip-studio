@@ -98,7 +98,7 @@ class DocumentContentAdapter(DocumentContentPort):
         """对文档内容应用 JSON Patch 并持久化，返回新内容。"""
         current = await self.get_content(document_id)
         # 规范化：为 paragraph 等节点补上缺失的 content，避免 patch 路径如 /content/12/content/0/text 报 member 'content' not found
-        current = _ensure_tiptap_content(current) if current else {}
+        # current = _ensure_tiptap_content(current) if current else {}
         try:
             new_content = jsonpatch.apply_patch(current, patch_operations)
         except jsonpatch.JsonPatchException as e:

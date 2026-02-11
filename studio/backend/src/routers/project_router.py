@@ -94,7 +94,7 @@ def create_project_router(project_service: ProjectService) -> APIRouter:
         response_model=List[ProjectResponse],
     )
     async def get_projects() -> List[ProjectResponse]:
-        """获取项目列表。"""
+        """获取项目列表（仅返回当前用户创建的项目，当前用户由上下文决定）。"""
         try:
             projects = await project_service.get_all_projects()
             return [_project_to_response(p) for p in projects]

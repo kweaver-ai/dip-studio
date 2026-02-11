@@ -55,16 +55,25 @@ class ProjectAdapter(ProjectPort):
             edited_at=row[8],
         )
 
-    async def get_all_projects(self) -> List[Project]:
-        """获取所有项目列表。"""
+    async def get_all_projects(self, creator_id: Optional[str] = None) -> List[Project]:
+        """获取项目列表；传入 creator_id 时仅返回该创建人的项目。"""
         pool = await self._db_pool.get_pool()
         async with pool.acquire() as conn:
             async with conn.cursor() as cursor:
-                await cursor.execute(
-                    """SELECT id, name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
-                       FROM project
-                       ORDER BY edited_at DESC"""
-                )
+                if creator_id is not None:
+                    await cursor.execute(
+                        """SELECT id, name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
+                           FROM project
+                           WHERE creator_id = %s
+                           ORDER BY edited_at DESC""",
+                        (creator_id,),
+                    )
+                else:
+                    await cursor.execute(
+                        """SELECT id, name, description, creator_id, creator_name, created_at, editor_id, editor_name, edited_at
+                           FROM project
+                           ORDER BY edited_at DESC"""
+                    )
                 rows = await cursor.fetchall()
                 return [self._row_to_project(row) for row in rows]
 
