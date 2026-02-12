@@ -258,6 +258,56 @@ class OpenAPILoader:
             "parameters": path_parameters,
             "operations": operations
         }
+
+    def find_operation_by_id(self, spec_id: str, operation_id: str) -> dict[str, Any]:
+        """
+        Find a single operation by its OpenAPI operationId.
+
+        Args:
+            spec_id: Specification identifier (filename without extension)
+            operation_id: Operation ID to look up (must be unique per spec)
+
+        Returns:
+            Detailed endpoint information for the matched operation.
+
+        Raises:
+            ValueError: If no operation or multiple operations are found with the given ID.
+        """
+        if not operation_id:
+            raise ValueError("operation_id must be a non-empty string")
+
+        spec = self.load_api_spec(spec_id)
+        paths = spec.get("paths", {})
+
+        found: dict[str, Any] | None = None
+        found_path: str | None = None
+        found_method: str | None = None
+
+        for path, path_item in paths.items():
+            for method_name in ["get", "post", "put", "delete", "patch", "head", "options"]:
+                if method_name not in path_item:
+                    continue
+                operation = path_item[method_name]
+                if operation.get("operationId") == operation_id:
+                    if found is not None:
+                        raise ValueError(
+                            f"Duplicate operationId '{operation_id}' found in specification {spec_id}"
+                        )
+                    found = operation
+                    found_path = path
+                    found_method = method_name
+
+        if found is None or found_path is None or found_method is None:
+            raise ValueError(
+                f"OperationId '{operation_id}' not found in specification {spec_id}"
+            )
+
+        return self._extract_operation_details(
+            spec,
+            found_path,
+            found_method,
+            found,
+        )
     
     def _find_spec_file(self, spec_id: str) -> Path | None:
         """Find specification file by ID.

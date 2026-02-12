@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import httpx
+from jinja2 import Environment, FileSystemLoader
 
 try:
     from mcp.server.fastmcp import FastMCP
@@ -34,6 +35,9 @@ mcp: FastMCP | None = None
 studio_base_url: str = ""
 # Server transport mode: "http" (SSE) or "streamable-http"
 server_transport: str | None = None
+
+# Jinja2 environment cache for context templates
+_jinja_env: Environment | None = None
 
 # 开发规范固定内容（不包含应用名称 / 导航 / 页面结构，由 _build_template_content 动态拼接）
 CODE_GUIDE_TEMPLATE = """
@@ -331,6 +335,152 @@ export default defineConfig(({ mode }) => ({
 }));
 ```
 """
+
+
+def _build_application_model(data: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    基于 Studio 返回的 context/content_to_develop 构建符合 TEMPLATE.md 约定的 application 结构。
+
+    目标结构:
+    {
+        "name": str,
+        "description": str,
+        "terms": [],
+        "pages": [
+            {
+                "name": str,
+                "description": str,
+                "features": [
+                    {
+                        "name": str,
+                        "description": str,
+                        "document": str,
+                    },
+                    ...
+                ],
+            },
+            ...
+        ],
+    }
+    """
+    context_items: List[Dict[str, Any]] = list(data.get("context") or [])
+    content_items: List[Dict[str, Any]] = list(data.get("content_to_develop") or [])
+    all_items: List[Dict[str, Any]] = context_items + content_items
+
+    def _get_node(item: Dict[str, Any]) -> Dict[str, Any]:
+        return item.get("node") or {}
+
+    def _get_doc_text(item: Dict[str, Any]) -> str:
+        return (item.get("document_text") or "").strip()
+
+    # 应用节点：优先从 context 中查找 node_type == application
+    app_node: Dict[str, Any] = {}
+    for item in all_items:
+        node = _get_node(item)
+        if node.get("node_type") == "application":
+            app_node = node
+            break
+
+    app_name: str = app_node.get("name") or ""
+    app_description: str = app_node.get("description") or ""
+
+    # 页面与功能分组
+    pages_by_id: Dict[str, Dict[str, Any]] = {}
+    for item in all_items:
+        node = _get_node(item)
+        node_id = node.get("id")
+        if node.get("node_type") == "page" and node_id:
+            pages_by_id[node_id] = {
+                "id": node_id,
+                "name": node.get("name") or "",
+                "description": node.get("description") or "",
+                "sort": node.get("sort", 0),
+                "features": [],
+            }
+
+    # functions 仅从 content_to_develop 中聚合（目标节点及其后代）
+    for item in content_items:
+        node = _get_node(item)
+        if node.get("node_type") != "function":
+            continue
+        parent_id = node.get("parent_id")
+        if not parent_id or parent_id not in pages_by_id:
+            continue
+
+        feature = {
+            "name": node.get("name") or "",
+            "description": node.get("description") or "",
+            "document": _get_doc_text(item),
+        }
+        pages_by_id[parent_id]["features"].append(feature)
+
+    # 页面按 sort 排序（若存在）
+    pages: List[Dict[str, Any]] = list(pages_by_id.values())
+    pages.sort(key=lambda p: (p.get("sort") is None, p.get("sort", 0)))
+
+    return {
+        "name": app_name,
+        "description": app_description,
+        # 术语表暂时留空，后续如需可从文档中解析填充
+        "terms": [],
+        "pages": [
+            {
+                "name": p.get("name") or "",
+                "description": p.get("description") or "",
+                "features": p.get("features") or [],
+            }
+            for p in pages
+        ],
+    }
+
+
+def _get_jinja_env() -> Environment:
+    """获取用于渲染 context_template 的 Jinja2 环境（带缓存）。"""
+    global _jinja_env
+    if _jinja_env is not None:
+        return _jinja_env
+
+    template_dir = Path(__file__).parent.parent / "resources" / "context_template"
+    _jinja_env = Environment(
+        loader=FileSystemLoader(str(template_dir)),
+        autoescape=False,
+        trim_blocks=True,
+        lstrip_blocks=True,
+    )
+    return _jinja_env
+
+
+def _render_context_template(data: Dict[str, Any]) -> str:
+    """
+    使用 context_template 下的 Jinja2 模板渲染完整的 template_content。
+
+    渲染顺序:
+    1. task.j2        - 应用任务摘要
+    2. application.j2 - 术语表 + 应用设计 + 导航
+    3. development.j2 - 开发规范
+    4. scaffold.j2    - 工程脚手架
+    """
+    application = _build_application_model(data)
+    env = _get_jinja_env()
+
+    sections: List[str] = []
+    for template_name in ["task.j2", "application.j2", "development.j2", "scaffold.j2"]:
+        try:
+            template = env.get_template(template_name)
+        except Exception as e:
+            logger.exception(f"加载 context 模板失败: {template_name}: {e}")
+            continue
+        try:
+            rendered = template.render(application=application)
+        except Exception as e:
+            logger.exception(f"渲染 context 模板失败: {template_name}: {e}")
+            continue
+
+        rendered_str = str(rendered).strip()
+        if rendered_str:
+            sections.append(rendered_str)
+
+    return "\n\n".join(sections)
 
 
 def _build_template_content(data: Dict[str, Any]) -> str:
@@ -640,10 +790,15 @@ def _register_get_context_tool() -> None:
             if isinstance(data, dict):
                 data = dict(data)
                 try:
-                    data["template_content"] = _build_template_content(data)
+                    # 优先使用基于 Jinja2 模板的渲染逻辑
+                    data["template_content"] = _render_context_template(data)
                 except Exception as build_err:
-                    # 构建模版内容失败时，仅记录日志，不影响基础上下文返回
-                    logger.exception(f"构建 template_content 失败: {build_err}")
+                    # 新模板渲染失败时，回退到旧的拼接逻辑，保证基础功能可用
+                    logger.exception(f"基于 context_template 渲染 template_content 失败，将回退到旧实现: {build_err}")
+                    try:
+                        data["template_content"] = _build_template_content(data)
+                    except Exception as legacy_err:
+                        logger.exception(f"回退构建 template_content 仍然失败: {legacy_err}")
             return _format_success_response(data)
         except httpx.HTTPStatusError as e:
             logger.error(f"Studio 请求失败: {e.response.status_code} {e.response.text}")
@@ -903,7 +1058,98 @@ def _register_api_tools() -> None:
                 language=language
             )
     
-    logger.info("Registered API tools: list_all_api_endpoints, get_api_code_example")
+    @mcp.tool()
+    def get_openapi_metadata(spec_id: str) -> str:
+        """Get basic metadata for all operations in a specific OpenAPI specification.
+        
+        Returns a compact list of operations (path, method, summary, operationId, tags)
+        for the given spec_id. Use this tool to discover available endpoints and pick
+        an operationId before calling get_openapi_schema.
+        """
+        try:
+            if openapi_loader is None:
+                raise RuntimeError("OpenAPI loader not initialized")
+            if not spec_id:
+                raise ValueError("spec_id is required")
+
+            specs = openapi_loader.list_api_specs()
+            available_ids = {s.get("id") for s in specs if "id" in s}
+            if spec_id not in available_ids:
+                raise ValueError(f"API specification not found: {spec_id}")
+
+            summary = openapi_loader.get_api_summary(spec_id)
+            endpoints = summary.get("endpoints", [])
+
+            result = {
+                "spec_id": spec_id,
+                "info": summary.get("info", {}),
+                "statistics": summary.get("statistics", {}),
+                "endpoints": [
+                    {
+                        "path": ep.get("path", ""),
+                        "method": ep.get("method", ""),
+                        "summary": ep.get("summary", ""),
+                        "description": ep.get("description", ""),
+                        "operation_id": ep.get("operation_id", ""),
+                        "tags": ep.get("tags", []),
+                    }
+                    for ep in endpoints
+                ],
+            }
+            return _format_success_response(result)
+        except Exception as e:
+            logger.error(f"Error getting OpenAPI metadata for spec '{spec_id}': {e}")
+            return _format_error_response(e, spec_id=spec_id)
+
+    @mcp.tool()
+    def get_openapi_schema(spec_id: str, operation_id: str) -> str:
+        """Get detailed schema information for a specific operationId.
+        
+        Typical usage:
+        1. Call get_openapi_metadata(spec_id) and choose an operationId.
+        2. Call this tool with the same spec_id and chosen operation_id to
+           retrieve full details (parameters, request body, responses, etc.).
+        """
+        try:
+            if openapi_loader is None:
+                raise RuntimeError("OpenAPI loader not initialized")
+            if not spec_id:
+                raise ValueError("spec_id is required")
+            if not operation_id:
+                raise ValueError("operation_id is required")
+
+            specs = openapi_loader.list_api_specs()
+            available_ids = {s.get("id") for s in specs if "id" in s}
+            if spec_id not in available_ids:
+                raise ValueError(f"API specification not found: {spec_id}")
+
+            details = openapi_loader.find_operation_by_id(spec_id, operation_id)
+
+            result = {
+                "spec_id": spec_id,
+                "operation_id": details.get("operation_id") or operation_id,
+                "path": details.get("path", ""),
+                "method": details.get("method", ""),
+                "summary": details.get("summary", ""),
+                "description": details.get("description", ""),
+                "tags": details.get("tags", []),
+                "parameters": details.get("parameters", []),
+                "request_body": details.get("request_body"),
+                "responses": details.get("responses", {}),
+                "security": details.get("security", []),
+                "deprecated": details.get("deprecated", False),
+            }
+            return _format_success_response(result)
+        except Exception as e:
+            logger.error(
+                f"Error getting OpenAPI schema for spec '{spec_id}', operation_id '{operation_id}': {e}"
+            )
+            return _format_error_response(e, spec_id=spec_id, operation_id=operation_id)
+    
+    logger.info(
+        "Registered API tools: list_all_api_endpoints, get_api_code_example, "
+        "get_openapi_metadata, get_openapi_schema"
+    )
 
 
 def _register_resources() -> None:

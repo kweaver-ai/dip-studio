@@ -20,6 +20,7 @@ paths:
   /mdl-uniquery/v1/metric-model:
     summary: 基于指标模型的数据预览
     post:
+      operationId: metricModelPreview
       tags:
         - 数据模型查询
       requestBody:
@@ -52,6 +53,7 @@ paths:
       description: 基于指标模型的数据预览
   /mdl-uniquery/v1/metric-models/{ids}:
     post:
+      operationId: metricModelsByIds
       tags:
         - 数据模型查询
       requestBody:
@@ -128,6 +130,7 @@ paths:
       in: query
   /mdl-uniquery/v1/metric-model-groups/{group_name}/metric-models:
     post:
+      operationId: metricModelGroupsQuery
       tags:
         - 数据模型查询
       requestBody:
@@ -214,6 +217,7 @@ paths:
   /mdl-uniquery/v1/metric-models/{id}/fields:
     summary: 基于指标模型id获取字段列表
     get:
+      operationId: metricModelFields
       tags:
         - 数据模型查询
       responses:
@@ -235,6 +239,7 @@ paths:
   /mdl-uniquery/v1/metric-models/{id}/field_values/{field_name}:
     summary: 基于指标模型id获取字段的值列表
     get:
+      operationId: metricModelFieldValues
       tags:
         - 数据模型查询
       parameters:
@@ -260,6 +265,7 @@ paths:
   /mdl-uniquery/v1/metric-models/{id}/labels:
     summary: 基于指标模型id获取维度字段列表
     get:
+      operationId: metricModelLabels
       tags:
         - 数据模型查询
       parameters:

@@ -148,6 +148,48 @@ Cursor 快速配置：在项目根目录创建 `.cursor/mcp.json`：
   - `language` (string, 可选): 目标语言，默认 `typescript`，可选 `python`、`javascript`
 - **返回**: 代码示例、集成信息及使用说明
 
+### 4. `get_openapi_metadata`
+
+按规范 ID 列出该 OpenAPI 规范下**所有接口的元数据**，包括 `summary`、`operationId`、`path`、`method` 等，用于第一步“选接口”。
+
+- **参数**:
+  - `spec_id` (string, 必需): 规范 ID（对应 `api-specs` 目录下的文件名去掉扩展名，例如 `mdl-uniquery`）
+- **返回** (JSON 字符串):
+  - `spec_id`: 规范 ID
+  - `info`: 规范基本信息（title、version 等）
+  - `statistics`: 路径数、端点数、schema 数等统计
+  - `endpoints`: 接口列表，每项包含：
+    - `path`: 接口路径
+    - `method`: HTTP 方法（GET/POST/...）
+    - `summary`: 摘要
+    - `description`: 详细描述
+    - `operation_id`: 唯一的 `operationId`
+    - `tags`: 标签数组
+
+典型用法：先根据业务场景筛选合适的 `operation_id`，再配合 `get_openapi_schema` 获取详细 schema。
+
+### 5. `get_openapi_schema`
+
+根据 `spec_id + operationId` 获取**单个接口的完整 schema 详情**，用于第二步“生成调用代码”。
+
+- **参数**:
+  - `spec_id` (string, 必需): 规范 ID
+  - `operation_id` (string, 必需): 通过 `get_openapi_metadata` 返回的 `operation_id`
+- **返回** (JSON 字符串):
+  - `spec_id`: 规范 ID
+  - `operation_id`: 操作 ID
+  - `path`: 接口路径
+  - `method`: HTTP 方法
+  - `summary` / `description`: 文本描述
+  - `tags`: 标签数组
+  - `parameters`: 参数列表（包含 name/in/required/schema 等）
+  - `request_body`: 请求体定义（content_type、schema 等），如有
+  - `responses`: 响应定义（按 HTTP 状态码包含 description、schema 等）
+  - `security`: 安全配置
+  - `deprecated`: 是否废弃
+
+推荐流程：`get_openapi_metadata` 选接口 → `get_openapi_schema` 拿结构 → 结合 `get_api_code_example` 或自行生成调用代码。
+
 ## MCP Resources
 
 - **api-spec://{spec_id}** — 完整 OpenAPI 规范文档
