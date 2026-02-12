@@ -1,0 +1,319 @@
+# 开发规范
+
+## 注意
+- 在编写代码前，一定要仔细阅读文档
+- 完全按照应用设计来开发，不要实现任何应用设计中没有提到的功能
+- 不要 Mock 任何数据，如果获取不到数据显示 “--”
+
+## 技术规格
+- 使用 TypeScript 作为前端开发语言
+- 使用 ReactJS 作为前端框架
+- 使用 React Router 6 作为前端路由框架
+- 使用 axios 作为 HTTP 库
+- 使用 Tailwind CSS 作为 CSS 框架
+- 使用 Vite 作为打包工具
+- 使用 Ant Design 作为 UI 框架，先阅读一遍[组件列表](https://ant.design/llms.txt)，在需要的时候仔细查阅组件 API
+
+## 调试
+- 使用 Vite 在开发时对后端接口进行代理，代理路径为：/api
+- 使用环境变量注入以下参数：
+  * SERVER_HOST: 代理服务器地址
+  * ACCESS_TOKEN：本地调试的时候从环境变量注入
+  * REFRESH_TOEKN：本地调试的时候从环境变量注入
+
+## 数据查询
+应用设计中包含以下标签时，需要调用 API 获取数据。查询 ADP Open API定义：
+- <metric>：查询指标模型数据
+- <knowledge>：查询业务知识网络
+
+## 对话组件
+应用设计中包含 <chatkit> 标签时，引入 @kweaver-ai/chatkit^0.1.0 作为 AI 助手交互组件，安装 NPM 包后仔细阅读 README.md 了解使用方式
+
+注意：
+- 严格按照 Open API 的定义构造接口调用参数，绝对不要构造出接口定义里没有明确声明的参数。
+
+## 代码要求
+你要开发的是一个 qiankun 微应用，项目代码必须遵循以下要求。
+
+### 接收主应用注入的 props
+以下在微应用中需要使用到 props，由主应用进行注入。你要将 YAML 转换为 TypeScript 的 MicroAppProps 定义
+
+```yaml
+$schema: https://json-schema.org/draft/2020-12/schema
+$title: MicroAppProps
+
+MicroAppProps:
+  type: object
+  properties:
+    token:
+      type: object
+      properties:
+        $ref: '#/schema/GetAccessToken'
+        $ref: '#/schema/RefreshToken'
+        $ref: '#/schema/TokenExpiredHandler'
+    route:
+      $ref: '#/schema/Route'
+    User:
+      $ref: '#/schema/User'
+    renderAppMenu:
+      $ref: '#/schema/RenderAppMenu'
+    logout:
+      $ref: '#/schema/Logout'
+    SetMicroAppState:
+      $ref: '#/schema/SetMicroAppState'
+    onMicroAppStateChange:
+      $ref: '#/schema/MicroAppStateChangeHandler'
+    container:
+      $ref: '#/schema/RootContainer'
+
+schema:
+  GetAccessToken:
+    type: function
+    name: accessToken
+    summary: 获取 Access Token
+    returns:
+      type: string
+      description: 返回 Token
+
+  RefreshToken:
+    type: function
+    name: refreshToken
+    summary: 刷新 Access Token
+    returns:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: 返回新的 Access Token
+
+  TokenExpiredHandler:
+    type: function
+    name: onTokenExpired
+    summary: Token 过期处理函数
+    parameters:
+      - name: code
+        type: number
+        description: 可选的错误码
+
+  Route:
+    type: object
+    properties:
+      basename:
+        type: string
+        description: 应用路由基础路径，例如 "dip-hub/application/123"
+  
+  User:
+    type: object
+    properties:
+      id: 
+        type: string
+      vision_name:
+        type: getter
+        description: 获取用户显示名称
+        returns:
+          type: string
+      account:
+        type: getter
+        description: 获取用户账号
+    
+  RenderAppMenu:
+    type: function
+    description: 渲染应用菜单
+    parameters:
+      - name: container
+        type: (HTMLElement | string)
+  
+  Logout:
+    type: function
+    description: 用户登出函数
+  
+  SetMicroAppState:
+    type: function
+    description: 设置微应用状态
+    parameters:
+      - name: state
+        type: Record<string, any>
+    returns:
+      type: boolean
+
+  MicroAppStateChangeHandler:
+    type: function
+    description: 监听微应用状态变化
+    parameters:
+      - type: function
+        name: callback
+        description: 状态变化回调函数
+        parameters:
+          - name: state
+            type: any
+          - name: prev
+            type: any
+      - name: fireImmediately
+        type: boolean
+        description: 是否立即触发回调
+    returns:
+      type: function
+      description: 取消监听函数
+
+  RootContainer:
+    type: HTMLElement
+    description: 容器元素
+```
+
+### 导出 qiankun 生命周期函数
+入口文件 `main.tsx` 中导出 `bootstrap`、`mount`、`unmount` 三个 qiankun 生命周期函数：
+* `bootstrap()`：微应用启动时调用，可以在这里做一些初始化工作
+* `mount()`：微应用挂载时调用，在这里渲染应用
+* `unmount()`：微应用卸载时调用，在这里清理资源
+
+### 路由
+从 props 中获取 basename，并传递给路由应用。
+
+```tsx
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import type { MicroAppProps } from './micro-app.d.ts'
+
+const App = ({ basename = '/' }: MicroAppProps) => {
+    return (
+        <BrowserRouter basename={basename}>
+        <Routes>
+            <Route path="/" element={<Home />} />
+            {/* 其他路由 */}
+        </Routes>
+        </BrowserRouter>
+    )
+}
+
+export default App
+```
+
+说明：
+* basename 由主应用提供，格式如 /application/123
+* 微应用内部路由应该使用相对路径，如 /、/about，而不是绝对路径
+* 最终访问路径 = basename + 微应用内部路径，如：/application/123/about
+
+### 认证集成
+在微应用中接收主应用注入的 token 和用户信息。示例代码如下：
+
+```tsx
+import type { MicroAppProps } from 'micro-app.d.ts'
+
+const App = ({ basename, token, user }: MicroAppProps) => {
+  // 使用 token
+  useEffect(() => {
+    if (token) {
+      // 设置 HTTP 请求的 token
+      // axios.defaults.headers.common['Authorization'] = `Bearer ${token.accessToken}`
+      
+      // 监听 token 过期
+      if (token.onTokenExpired) {
+        // 在 HTTP 拦截器中调用
+      }
+    }
+  }, [token])
+
+  return (
+    <BrowserRouter basename={basename}>
+      {/* 应用内容 */}
+    </BrowserRouter>
+  )
+}
+```
+
+### 适配 Vite
+
+示例代码如下：
+
+```tsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { ConfigProvider } from "antd";
+import { renderWithQiankun, qiankunWindow } from "vite-plugin-qiankun/dist/helper";
+import App from "./App";
+import type { MicroAppProps } from "./micro-app";
+
+let root: ReturnType<typeof ReactDOM.createRoot> | null = null;
+
+const render = ({ container, route, token, user, setMicroAppState, onMicroAppStateChange }: MicroAppProps = {}) => {
+  const rootElement = container ? container.querySelector("#root") || container : document.querySelector("#root");
+
+  if (!rootElement) {
+    return;
+  }
+
+  if (root) {
+    root.unmount();
+  }
+
+  root = ReactDOM.createRoot(rootElement as HTMLElement);
+  root.render(
+    <React.StrictMode>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: "#b45309",
+            colorTextBase: "#1f2937",
+            fontFamily:
+              "'IBM Plex Sans', 'Noto Sans SC', 'PingFang SC', sans-serif"
+          }
+        }}
+      >
+        <App
+          basename={route?.basename}
+          token={token}
+          user={user}
+          setMicroAppState={setMicroAppState}
+          onMicroAppStateChange={onMicroAppStateChange}
+        />
+      </ConfigProvider>
+    </React.StrictMode>
+  );
+};
+
+renderWithQiankun({
+  mount(props) {
+    console.log("[微应用] mount", props);
+    render(props);
+  },
+  bootstrap() {
+    console.log("[微应用] bootstrap");
+  },
+  unmount(props: any) {
+    console.log("[微应用] unmount");
+    if (root) {
+      root.unmount();
+      root = null;
+    }
+  },
+  update(props: any) {
+    console.log("[微应用] update", props);
+  }
+});
+
+if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
+  render();
+}
+```
+
+- 需要引入 `vite-plugin-qiankun`
+- 使用 `renderWithQiankun` 导出生命周期函数
+- 使用 `qiankunWindow.__POWERED_BY_QIANKUN__` 判断是否在 qiankun 环境中运行
+
+### 构建
+1、需要引入 `vite-plugin-qiankun` 并且设置 `base` 属性与 packageName 对应
+2、示例代码：
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import qiankun from "vite-plugin-qiankun";
+
+const packageName = "dip-for-talent";
+
+export default defineConfig(({ mode} ) => ({
+  plugins: [
+    react(),
+    qiankun(packageName, {
+      useDevMode: mode === "development"
+    })
+  ],
+  base: "/dip-for-talent/",
+}));

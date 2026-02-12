@@ -1,0 +1,38 @@
+{% with terms=application.terms, pages=application.pages %}
+{% if terms.length > 0 %}
+# 术语表
+
+| 术语 | 解释 |
+| -- | -- |
+{% for term, defination in terms %}
+| {{ term }} | {{ defination }} |
+{% endfor %}
+{% endif %}
+
+# 应用设计
+
+## 导航
+
+{% if pages.length > 1 %}
+按照以下结构设计导航。
+
+```
+{{ application.name }}
+{% for name, description in pages %}
+  |-- {{ name }}: {{ description }}
+{% endfor %}
+```
+{% endif %}
+
+{% for name, features in pages %}
+## {{ name }}
+
+{% for feature in features %}
+###  {{ feature.name }}
+{{ feature.description | default('')}}
+
+{{ feature.document }}
+{% endfor %}
+{% endfor %}
+
+{% endwith %}
